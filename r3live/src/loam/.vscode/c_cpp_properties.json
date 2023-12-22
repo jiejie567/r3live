@@ -1,0 +1,30 @@
+{
+  "configurations": [
+    {
+      "browse": {
+        "databaseFilename": "${default}",
+        "limitSymbolsToIncludedHeaders": false
+      },
+      "includePath": [
+        "/opt/ros/noetic/include/**",
+        "/home/jeff/slam_ws/devel/include/**",
+        "/home/jeff/slam_ws/src/Azure_Kinect_ROS_Driver/include/**",
+        "/home/jeff/slam_ws/src/gazebo_ros_pkgs/gazebo_plugins/include/**",
+        "/home/jeff/slam_ws/src/gazebo_ros_pkgs/gazebo_ros/include/**",
+        "/home/jeff/slam_ws/src/gazebo_ros_pkgs/gazebo_ros_control/include/**",
+        "/home/jeff/slam_ws/src/Livox_simulation_customMsg/include/**",
+        "/home/jeff/slam_ws/src/octomap_msgs/include/**",
+        "/home/jeff/slam_ws/src/velodyne_gazebo_plugins/include/**",
+        "/home/jeff/slam_ws/src/rpg_vikit/vikit_common/include/**",
+        "/home/jeff/slam_ws/src/rpg_vikit/vikit_ros/include/**",
+        "/usr/include/**"
+      ],
+      "name": "ROS",
+      "intelliSenseMode": "gcc-x64",
+      "compilerPath": "/usr/bin/gcc",
+      "cStandard": "gnu11",
+      "cppStandard": "c++14"
+    }
+  ],
+  "version": 4
+}

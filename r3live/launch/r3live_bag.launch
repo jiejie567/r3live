@@ -13,4 +13,8 @@
     <group if="$(arg rviz)">
         <node name="rvizvisualisation" pkg="rviz" type="rviz" output="log" args="-d $(find r3live)/../config/rviz/r3live_rviz_config.rviz" />
     </group>
+
+    <arg name="bag_name" value="/home/jeff/Downloads/dataset/r3live_opensource_bag/degenerate_seq_02.bag"/>
+    <!-- <arg name="bag_name" value="/home/jeff/Downloads/dataset/r3live_opensource_bag/hku_campus_seq_00.bag"/> -->
+	<node pkg="rosbag" type="play" name="rosbag" args=" -r 3.0 -s 0.0 $(arg bag_name)"/>
 </launch>

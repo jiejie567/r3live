@@ -1,0 +1,12 @@
+{
+    "python.autoComplete.extraPaths": [
+        "/home/jeff/slam_repo/r3live_ws/devel/lib/python3/dist-packages",
+        "/home/jeff/slam_ws/devel/lib/python3/dist-packages",
+        "/opt/ros/noetic/lib/python3/dist-packages"
+    ],
+    "python.analysis.extraPaths": [
+        "/home/jeff/slam_repo/r3live_ws/devel/lib/python3/dist-packages",
+        "/home/jeff/slam_ws/devel/lib/python3/dist-packages",
+        "/opt/ros/noetic/lib/python3/dist-packages"
+    ]
+}

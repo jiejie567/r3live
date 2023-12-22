@@ -228,17 +228,25 @@ void R3LIVE::publish_track_img( cv::Mat &img, double frame_cost_time = -1 )
     if ( frame_cost_time > 0 )
     {
         char fps_char[ 100 ];
-        sprintf( fps_char, "Per-frame cost time: %.2f ms", frame_cost_time );
+        if(b_need_cam)
+        {
+            sprintf( fps_char, "Degrated!!! Frame cost time: %.2f ms", frame_cost_time );
+
+        }
+        else
+        {
+        sprintf( fps_char, "Frame cost time: %.2f ms", frame_cost_time );
+        }
         // sprintf(fps_char, "%.2f ms", frame_cost_time);
 
         if ( pub_image.cols <= 640 )
         {
-            cv::putText( pub_image, std::string( fps_char ), cv::Point( 30, 30 ), cv::FONT_HERSHEY_COMPLEX, 1, cv::Scalar( 255, 255, 255 ), 2, 8,
+            cv::putText( pub_image, std::string( fps_char ), cv::Point( 30, 30 ), cv::FONT_HERSHEY_COMPLEX, 0.7, cv::Scalar( 255, 255, 255 ), 2, 8,
                          0 ); // 640 * 480
         }
         else if ( pub_image.cols > 640 )
         {
-            cv::putText( pub_image, std::string( fps_char ), cv::Point( 30, 50 ), cv::FONT_HERSHEY_COMPLEX, 2, cv::Scalar( 255, 255, 255 ), 2, 8,
+            cv::putText( pub_image, std::string( fps_char ), cv::Point( 30, 50 ), cv::FONT_HERSHEY_COMPLEX, 1.5, cv::Scalar( 255, 255, 255 ), 2, 8,
                          0 ); // 1280 * 1080
         }
     }
@@ -433,13 +441,15 @@ void   R3LIVE::process_image( cv::Mat &temp_img, double msg_time )
 void R3LIVE::load_vio_parameters()
 {
 
-    std::vector< double > camera_intrinsic_data, camera_dist_coeffs_data, camera_ext_R_data, camera_ext_t_data;
+    std::vector< double > camera_intrinsic_data, camera_dist_coeffs_data, camera_ext_R_data, camera_ext_t_data, lidar_ext_R_il_data, lidar_ext_t_il_data;
     m_ros_node_handle.getParam( "r3live_vio/image_width", m_vio_image_width );
     m_ros_node_handle.getParam( "r3live_vio/image_height", m_vio_image_heigh );
     m_ros_node_handle.getParam( "r3live_vio/camera_intrinsic", camera_intrinsic_data );
     m_ros_node_handle.getParam( "r3live_vio/camera_dist_coeffs", camera_dist_coeffs_data );
     m_ros_node_handle.getParam( "r3live_vio/camera_ext_R", camera_ext_R_data );
     m_ros_node_handle.getParam( "r3live_vio/camera_ext_t", camera_ext_t_data );
+    m_ros_node_handle.getParam( "r3live_lio/lidar_ext_R_il", lidar_ext_R_il_data );//lio
+    m_ros_node_handle.getParam( "r3live_lio/lidar_ext_t_il", lidar_ext_t_il_data );//lio
 
     CV_Assert( ( m_vio_image_width != 0 && m_vio_image_heigh != 0 ) );
 
@@ -458,6 +468,8 @@ void R3LIVE::load_vio_parameters()
     m_camera_dist_coeffs = Eigen::Map< Eigen::Matrix< double, 5, 1 > >( camera_dist_coeffs_data.data() );
     m_camera_ext_R = Eigen::Map< Eigen::Matrix< double, 3, 3, Eigen::RowMajor > >( camera_ext_R_data.data() );
     m_camera_ext_t = Eigen::Map< Eigen::Matrix< double, 3, 1 > >( camera_ext_t_data.data() );
+    m_lidar_ext_R_il = Eigen::Map< Eigen::Matrix< double, 3, 3, Eigen::RowMajor > >( lidar_ext_R_il_data.data() );
+    m_lidar_ext_t_il = Eigen::Map< Eigen::Matrix< double, 3, 1 > >( lidar_ext_t_il_data.data() );
 
     cout << "[Ros_parameter]: r3live_vio/Camera Intrinsic: " << endl;
     cout << m_camera_intrinsic << endl;
@@ -715,22 +727,22 @@ bool      R3LIVE::vio_esikf( StatesGroup &state_in, Rgbmap_tracker &op_track )
             if ( DIM_OF_STATES > 24 )
             {
                 // Estimate time td.
-                H_mat.block( pt_idx * 2, 24, 2, 1 ) = pt_img_vel * huber_loss_scale;
+                // H_mat.block( pt_idx * 2, 24, 2, 1 ) = pt_img_vel * huber_loss_scale;
                 // H_mat(pt_idx * 2, 24) = pt_img_vel(0) * huber_loss_scale;
                 // H_mat(pt_idx * 2 + 1, 24) = pt_img_vel(1) * huber_loss_scale;
             }
             if ( m_if_estimate_i2c_extrinsic )
             {
-                H_mat.block( pt_idx * 2, 18, 2, 3 ) = mat_pre * mat_C * huber_loss_scale;
-                H_mat.block( pt_idx * 2, 21, 2, 3 ) = mat_pre * mat_D * huber_loss_scale;
+                // H_mat.block( pt_idx * 2, 18, 2, 3 ) = mat_pre * mat_C * huber_loss_scale;
+                // H_mat.block( pt_idx * 2, 21, 2, 3 ) = mat_pre * mat_D * huber_loss_scale;
             }
 
             if ( m_if_estimate_intrinsic )
             {
-                H_mat( pt_idx * 2, 25 ) = pt_3d_cam( 0 ) / pt_3d_cam( 2 ) * huber_loss_scale;
-                H_mat( pt_idx * 2 + 1, 26 ) = pt_3d_cam( 1 ) / pt_3d_cam( 2 ) * huber_loss_scale;
-                H_mat( pt_idx * 2, 27 ) = 1 * huber_loss_scale;
-                H_mat( pt_idx * 2 + 1, 28 ) = 1 * huber_loss_scale;
+                // H_mat( pt_idx * 2, 25 ) = pt_3d_cam( 0 ) / pt_3d_cam( 2 ) * huber_loss_scale;
+                // H_mat( pt_idx * 2 + 1, 26 ) = pt_3d_cam( 1 ) / pt_3d_cam( 2 ) * huber_loss_scale;
+                // H_mat( pt_idx * 2, 27 ) = 1 * huber_loss_scale;
+                // H_mat( pt_idx * 2 + 1, 28 ) = 1 * huber_loss_scale;
             }
         }
         H_mat = H_mat / img_res_scale;
@@ -746,14 +758,38 @@ bool      R3LIVE::vio_esikf( StatesGroup &state_in, Rgbmap_tracker &op_track )
         Eigen::SparseMatrix< double > Hsub_T_temp_mat = H_mat_spa.transpose();
         vec_spa = ( state_iter - state_in ).sparseView();
         H_T_H_spa = Hsub_T_temp_mat * H_mat_spa;
-        // Notice that we have combine some matrix using () in order to boost the matrix multiplication.
+        Eigen::Matrix<double, DIM_OF_STATES, DIM_OF_STATES>  H_T_H;
+        H_T_H = H_T_H_spa.toDense();
+        // std::cout<< "H_T_H"<< std::endl<< H_T_H << std::endl << std::endl;
+        // std::cout<< "H_T_H_small"<< std::endl<< H_T_H_small << std::endl << std::endl;
+        Eigen::Matrix<double, DIM_OF_STATES, DIM_OF_STATES> H_T_H_inv;
+        H_T_H_inv.setZero();
+        H_T_H_inv.block<6,6>(0,0) = H_T_H.block<6,6>(0,0).inverse();
+
+
+
+
+        // std::cout<< "H_T_H_small * H_T_H_small_inv"<< std::endl<< H_T_H_small * H_T_H_small_inv << std::endl << std::endl;
+        // std::cout<< "H_T_H * H_T_H_big_inv"<< std::endl<< H_T_H * H_T_H_big_inv << std::endl << std::endl;
+        // std::cout<< " eigenRotation.cast<double>() * set_zero_matrix.cast<double>() * eigenRotation.cast<double>().transpose()"<< std::endl<<  eigenRotation.cast<double>() * set_zero_matrix.cast<double>() * eigenRotation.cast<double>().transpose() << std::endl << std::endl;
+
+         Eigen::Matrix<double, DIM_OF_STATES, DIM_OF_STATES> transformation = eigenRotation * set_zero_matrix * eigenRotation.transpose();
+        Eigen::Matrix<double, DIM_OF_STATES, DIM_OF_STATES> H_T_H_new = transformation * H_T_H * transformation;
+        // H_T_H_new.setZero();
+        H_T_H_spa = H_T_H_new.sparseView();
+        // std::cout<< "H_T_H_new * H_T_H_inv "<< std::endl<< H_T_H_new * H_T_H_inv << std::endl << std::endl;
+        Hsub_T_temp_mat = ((H_T_H_new * H_T_H_inv).cast<double>() * H_mat.transpose()).sparseView();
+        // std::cout<< "H_mat.transpose() "<< std::endl<< H_mat.transpose().block<6,6>(0,0) << std::endl << std::endl;
+        // std::cout<< "Hsub_T_temp_mat "<< std::endl<< Hsub_T_temp_mat.toDense().block<6,6>(0,0) << std::endl << std::endl;
+
+        // Notice that we have combine some matrix using () in order to boost the matrix multiplication.  
         Eigen::SparseMatrix< double > temp_inv_mat =
-            ( ( H_T_H_spa.toDense() + eigen_mat< -1, -1 >( state_in.cov * m_cam_measurement_weight ).inverse() ).inverse() ).sparseView();
-        KH_spa = temp_inv_mat * ( Hsub_T_temp_mat * H_mat_spa );
-        solution = ( temp_inv_mat * ( Hsub_T_temp_mat * ( ( -1 * meas_vec.sparseView() ) ) ) - ( I_STATE_spa - KH_spa ) * vec_spa ).toDense();
+            ( ( H_T_H_new.cast<double>() + eigen_mat< -1, -1 >( state_in.cov * m_cam_measurement_weight ).inverse() ).inverse() ).sparseView();
+        KH_spa = temp_inv_mat * H_T_H_spa;
+        solution = ( temp_inv_mat * ( Hsub_T_temp_mat *  ( -1 * meas_vec.sparseView()  ) ) - ( I_STATE_spa - KH_spa ) * vec_spa ).toDense();
 
         state_iter = state_iter + solution;
-
+ 
         if ( fabs( acc_reprojection_error - last_repro_err ) < 0.01 )
         {
             break;
@@ -1169,29 +1205,40 @@ void R3LIVE::service_VIO_update()
             continue;
         }
         set_image_pose( img_pose, state_out );
-
-        op_track.track_img( img_pose, -20 );
+        if(b_need_cam)
+        {
+            op_track.track_img( img_pose, -20 );
+        }
         g_cost_time_logger.record( tim, "Track_img" );
         // cout << "Track_img cost " << tim.toc( "Track_img" ) << endl;
         tim.tic( "Ransac" );
         set_image_pose( img_pose, state_out );
-
-        // ANCHOR -  remove point using PnP.
-        if ( op_track.remove_outlier_using_ransac_pnp( img_pose ) == 0 )
+        if(b_need_cam)
         {
-            cout << ANSI_COLOR_RED_BOLD << "****** Remove_outlier_using_ransac_pnp error*****" << ANSI_COLOR_RESET << endl;
+            // ANCHOR -  remove point using PnP.
+            if ( op_track.remove_outlier_using_ransac_pnp( img_pose ) == 0 )
+            {
+                cout << ANSI_COLOR_RED_BOLD << "****** Remove_outlier_using_ransac_pnp error*****" << ANSI_COLOR_RESET << endl;
+            }
         }
         g_cost_time_logger.record( tim, "Ransac" );
-        tim.tic( "Vio_f2f" );
         bool res_esikf = true, res_photometric = true;
         wait_render_thread_finish();
-        res_esikf = vio_esikf( state_out, op_track );
+        tim.tic( "Vio_f2f" );
+        // auto tmp = state_out;
+        if(b_need_cam)
+        {
+            res_esikf = vio_esikf( state_out, op_track );
+        }
         g_cost_time_logger.record( tim, "Vio_f2f" );
         tim.tic( "Vio_f2m" );
-        res_photometric = vio_photometric( state_out, op_track, img_pose );
+        if(b_need_cam)  
+        {
+            // res_photometric = vio_photometric( state_out, op_track, img_pose );
+        }
         g_cost_time_logger.record( tim, "Vio_f2m" );
         g_lio_state = state_out;
-        print_dash_board();
+        // print_dash_board();
         set_image_pose( img_pose, state_out );
 
         if ( 1 )

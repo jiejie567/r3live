@@ -3,6 +3,8 @@
 #include <sensor_msgs/PointCloud2.h>
 #include <livox_ros_driver/CustomMsg.h>
 #include "../tools/tools_logger.hpp"
+#include <random>
+
 
 using namespace std;
 
@@ -17,7 +19,8 @@ enum LID_TYPE
     MID,
     HORIZON,
     VELO16,
-    OUST64
+    OUST64,
+    ToFRGBD
 };
 
 enum Feature
@@ -82,6 +85,7 @@ void   mid_handler( const sensor_msgs::PointCloud2::ConstPtr &msg );
 void   horizon_handler( const livox_ros_driver::CustomMsg::ConstPtr &msg );
 void   velo16_handler( const sensor_msgs::PointCloud2::ConstPtr &msg );
 void   oust64_handler( const sensor_msgs::PointCloud2::ConstPtr &msg );
+void   ToFRGBD_handler( const sensor_msgs::PointCloud2::ConstPtr &msg );
 void   give_feature( pcl::PointCloud< PointType > &pl, vector< orgtype > &types, pcl::PointCloud< PointType > &pl_corn,
                      pcl::PointCloud< PointType > &pl_surf );
 void   pub_func( pcl::PointCloud< PointType > &pl, ros::Publisher pub, const ros::Time &ct );
@@ -95,7 +99,7 @@ int main( int argc, char **argv )
     ros::NodeHandle n;
 
     n.param< int >( "Lidar_front_end/lidar_type", lidar_type, 0 );
-    n.param< double >( "Lidar_front_end/blind", blind, 0.1 );
+    n.param< double >( "Lidar_front_end/blind", blind, 0.25 );
     n.param< double >( "Lidar_front_end/inf_bound", inf_bound, 4 );
     n.param< int >( "Lidar_front_end/N_SCANS", N_SCANS, 1 );
     n.param< int >( "Lidar_front_end/group_size", group_size, 8 );
@@ -143,6 +147,11 @@ int main( int argc, char **argv )
     case OUST64:
         printf( "OUST64\n" );
         sub_points = n.subscribe( "/os_cloud_node/points", 1000, oust64_handler, ros::TransportHints().tcpNoDelay() );
+        break;
+
+    case ToFRGBD:
+        printf( "ToFRGBD\n" );
+        sub_points = n.subscribe( "/points2", 1000, ToFRGBD_handler, ros::TransportHints().tcpNoDelay() );
         break;
 
     default:
@@ -380,6 +389,40 @@ void oust64_handler(const sensor_msgs::PointCloud2::ConstPtr &msg)
     pub_func( pl_processed, pub_corn, msg->header.stamp );
 }
 
+std::random_device rd;
+std::default_random_engine eng(rd());
+void ToFRGBD_handler(const sensor_msgs::PointCloud2::ConstPtr &msg)
+{
+    pcl::PointCloud< PointType > pl_surf;
+    pcl::PointCloud<pcl::PointXYZ> pl_orig;
+    pcl::fromROSMsg(*msg, pl_orig);
+    int plsize = pl_orig.size();
+    pl_surf.reserve(plsize);
+    static std::uniform_int_distribution<int> distr(1, point_filter_num);
+
+
+    for (int i = 0; i < pl_orig.points.size(); i++) {
+
+        if (distr(eng) != 1) continue;
+
+        double range = pl_orig.points[i].x * pl_orig.points[i].x + pl_orig.points[i].y * pl_orig.points[i].y +
+                       pl_orig.points[i].z * pl_orig.points[i].z;
+
+        if (range < blind * blind || isnan(range)) continue;
+
+
+        Eigen::Vector3d pt_vec;
+        PointType added_pt;
+        added_pt.x = pl_orig.points[i].x;
+        added_pt.y = pl_orig.points[i].y;
+        added_pt.z = pl_orig.points[i].z;
+        added_pt.curvature = 0.0;
+        pl_surf.points.push_back(added_pt);
+    }
+    pub_func( pl_surf, pub_full, msg->header.stamp );
+    pub_func( pl_surf, pub_surf, msg->header.stamp );
+    pub_func( pl_surf, pub_corn, msg->header.stamp );
+}
 
 void give_feature( pcl::PointCloud< PointType > &pl, vector< orgtype > &types, pcl::PointCloud< PointType > &pl_corn,
                    pcl::PointCloud< PointType > &pl_surf )

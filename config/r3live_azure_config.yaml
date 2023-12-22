@@ -1,8 +1,9 @@
 Lidar_front_end:
-   lidar_type: 1   # 1 for Livox-avia, 3 for Ouster-OS1-64
+   lidar_type: 4   # 1 for Livox-avia, 3 for Ouster-OS1-64, 4 for Azure Kinect DK
    N_SCANS: 6
    using_raw_point: 1
-   point_step: 5
+   point_filter_num: 50
+   point_step: 50
    
 r3live_common:
    if_dump_log: 1                   # If recording ESIKF update log. [default = 0]
@@ -17,19 +18,21 @@ r3live_common:
 
 r3live_vio:
    image_width: 1280
-   image_height: 1024
+   image_height: 720
    camera_intrinsic:
-      [863.4241, 0.0, 640.6808,
-      0.0,  863.4171, 518.3392,
+      [607.778, 0.0, 636.636,
+      0.0,  607.751, 368.102,
       0.0, 0.0, 1.0 ] 
-   camera_dist_coeffs: [-0.1080, 0.1050, -1.2872e-04, 5.7923e-05, -0.0222]  #k1, k2, p1, p2, k3
+   camera_dist_coeffs: [0.527894, -2.78783, 0.000106269, 2.59275e-05, 1.66303]  #k1, k2, p1, p2, k3
    # Fine extrinsic value. form camera-LiDAR calibration.
-   camera_ext_R:
-         [-0.00113207, -0.0158688, 0.999873,
-            -0.9999999,  -0.000486594, -0.00113994,
-            0.000504622,  -0.999874,  -0.0158682]
+   camera_ext_R: #actually , camera imu 
+         [-0.00061492, 0.00730016, -0.999973,
+            -0.999996, -0.00270155, 0.000595212,
+            -0.00269713, 0.99997, 0.00730179]
    # camera_ext_t: [0.050166, 0.0474116, -0.0312415] 
-   camera_ext_t: [0,0,0] 
+   camera_ext_t: [-0.046, -0.028, 0.003] 
+   # camera_ext_t: [-0.028, -0.003, -0.046] 
+
    # Rough extrinsic value, form CAD model, is not correct enough, but can be online calibrated in our datasets.
    # camera_ext_R:
    #    [0, 0, 1,
@@ -38,16 +41,17 @@ r3live_vio:
    # camera_ext_t: [0,0,0] 
    
 r3live_lio:        
-   lio_update_point_step: 4   # Point step used for LIO update.  
-   max_iteration: 2           # Maximum times of LIO esikf.
+   lio_update_point_step: 1   # Point step used for LIO update.  
+   max_iteration: 3           # Maximum times of LIO esikf.
    lidar_time_delay: 0        # The time-offset between LiDAR and IMU, provided by user. 
-   filter_size_corner: 0.10   
-   filter_size_surf: 0.10
-   filter_size_surf_z: 0.10
-   filter_size_map: 0.10
-   lidar_ext_R_il: #actually , camera imu 
-         [1.0, 0.0, 0.0,
-            0.0, 1.0, 0.0,
-            0.0, 0.0, 1.0]
+   voxel_downsample_size_surf: 0.2
+   filter_size_map: 0.2   
+   lidar_ext_R_il: 
+       [ -0.00455602, 0.108595, -0.99407, 
+                   -0.999958, -0.00837415, 0.00366818, 
+                   -0.0079262, 0.994051, 0.108628]
+         # [0.00202008, -0.999985, -0.00508471,
+         #    0.108542, -0.00483541, 0.99408,
+         #    -0.99409, -0.00256003, 0.10853]
    # camera_ext_t: [0.050166, 0.0474116, -0.0312415] 
-   lidar_ext_t_il: [0.04165, 0.02326, -0.0284]
+   lidar_ext_t_il: [-0.051, 0.003, 0.001] 

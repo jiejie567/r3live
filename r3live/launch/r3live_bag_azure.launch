@@ -1,0 +1,25 @@
+<launch>
+    <node pkg="tf" type="static_transform_publisher" name="word2camera"  args="0 0 0 0 3.14 0 /world /camera_init 100" />
+    <param name="/use_sim_time" value="true" />
+
+    <!-- Subscribed topics -->
+    <param name="/LiDAR_pointcloud_topic" type="string" value= "/laser_cloud_flat" />
+    <param name="/IMU_topic" type="string" value= "/imu" />
+    <param name="/Image_topic" type="string" value= "/rgb/image_raw" />
+    <param name="map_output_dir" type="string" value="$(env HOME)/r3live_output" />
+    <rosparam command="load" file="$(find r3live)/../config/r3live_azure_config.yaml" />
+    
+
+        
+    <node pkg="r3live" type="r3live_LiDAR_front_end" name="r3live_LiDAR_front_end"  output="screen" required="true"/>
+    <node pkg="r3live" type="r3live_mapping" name="r3live_mapping" output="screen" required="true" />
+    
+    <arg name="rviz" default="1" />
+    <group if="$(arg rviz)">
+        <node name="rvizvisualisation" pkg="rviz" type="rviz" output="log" args="-d $(find r3live)/../config/rviz/r3live_rviz_config_ouster.rviz" />
+    </group>
+
+    <arg name="bag_name" value="/home/jeff/Downloads/dataset/azure_office.bag"/>
+	<node pkg="rosbag" type="play" name="rosbag" args=" -r 1.0 -s 0.0 $(arg bag_name) --clock" />
+
+ </launch>

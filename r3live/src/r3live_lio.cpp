@@ -63,12 +63,12 @@ void R3LIVE::imu_cbk( const sensor_msgs::Imu::ConstPtr &msg_in )
 
     last_timestamp_imu = timestamp;
 
-    if ( g_camera_lidar_queue.m_if_acc_mul_G )
-    {
-        msg->linear_acceleration.x *= G_m_s2;
-        msg->linear_acceleration.y *= G_m_s2;
-        msg->linear_acceleration.z *= G_m_s2;
-    }
+    // if ( g_camera_lidar_queue.m_if_acc_mul_G )
+    // {
+    //     msg->linear_acceleration.x *= G_m_s2;
+    //     msg->linear_acceleration.y *= G_m_s2;
+    //     msg->linear_acceleration.z *= G_m_s2;
+    // }
 
     imu_buffer_lio.push_back( msg );
     imu_buffer_vio.push_back( msg );
@@ -165,7 +165,14 @@ bool R3LIVE::sync_packages( MeasureGroup &meas )
         }
         // pcl::fromROSMsg(*(lidar_buffer.front()), *(meas.lidar));
         meas.lidar_beg_time = lidar_buffer.front()->header.stamp.toSec();
-        lidar_end_time = meas.lidar_beg_time + meas.lidar->points.back().curvature / double( 1000 );
+        if(meas.lidar->points.back().curvature == 0.0) //for ToFRGBD
+        {
+            lidar_end_time = meas.lidar_beg_time;
+        }
+        else
+        {
+            lidar_end_time = meas.lidar_beg_time + meas.lidar->points.back().curvature / double( 1000 );
+        }
         meas.lidar_end_time = lidar_end_time;
         // printf("Input LiDAR time = %.3f, %.3f\n", meas.lidar_beg_time, meas.lidar_end_time);
         // printf_line_mem_MB;
@@ -200,7 +207,7 @@ bool R3LIVE::sync_packages( MeasureGroup &meas )
 void R3LIVE::pointBodyToWorld( PointType const *const pi, PointType *const po )
 {
     Eigen::Vector3d p_body( pi->x, pi->y, pi->z );
-    Eigen::Vector3d p_global( g_lio_state.rot_end * ( p_body + Lidar_offset_to_IMU ) + g_lio_state.pos_end );
+    Eigen::Vector3d p_global( g_lio_state.rot_end * ( p_body ) + g_lio_state.pos_end );
 
     po->x = p_global( 0 );
     po->y = p_global( 1 );
@@ -211,7 +218,7 @@ void R3LIVE::pointBodyToWorld( PointType const *const pi, PointType *const po )
 void R3LIVE::RGBpointBodyToWorld( PointType const *const pi, pcl::PointXYZI *const po )
 {
     Eigen::Vector3d p_body( pi->x, pi->y, pi->z );
-    Eigen::Vector3d p_global( g_lio_state.rot_end * ( p_body + Lidar_offset_to_IMU ) + g_lio_state.pos_end );
+    Eigen::Vector3d p_global( g_lio_state.rot_end * ( p_body) + g_lio_state.pos_end );
 
     po->x = p_global( 0 );
     po->y = p_global( 1 );
@@ -566,7 +573,7 @@ int R3LIVE::service_LIO_update()
             pca_time = 0;
             svd_time = 0;
             t0 = omp_get_wtime();
-            p_imu->Process( Measures, g_lio_state, feats_undistort );
+            p_imu->Process( Measures, g_lio_state, feats_undistort ,m_lidar_ext_R_il, m_lidar_ext_t_il);
 
             g_camera_lidar_queue.g_noise_cov_acc = p_imu->cov_acc;
             g_camera_lidar_queue.g_noise_cov_gyro = p_imu->cov_gyr;
@@ -802,7 +809,7 @@ int R3LIVE::service_LIO_update()
                     {
                         const PointType &laser_p = laserCloudOri->points[ i ];
                         Eigen::Vector3d  point_this( laser_p.x, laser_p.y, laser_p.z );
-                        point_this += Lidar_offset_to_IMU;
+                        // point_this += Lidar_offset_to_IMU;
                         Eigen::Matrix3d point_crossmat;
                         point_crossmat << SKEW_SYM_MATRIX( point_this );
 
@@ -821,7 +828,7 @@ int R3LIVE::service_LIO_update()
                     Eigen::Vector3d                           rot_add, t_add, v_add, bg_add, ba_add, g_add;
                     Eigen::Matrix< double, DIM_OF_STATES, 1 > solution;
                     Eigen::MatrixXd                           K( DIM_OF_STATES, laserCloudSelNum );
-
+                    
                     /*** Iterative Kalman Filter Update ***/
                     if ( !flg_EKF_inited )
                     {
@@ -834,6 +841,53 @@ int R3LIVE::service_LIO_update()
                         // cout << ANSI_COLOR_RED_BOLD << "Run EKF uph" << ANSI_COLOR_RESET << endl;
                         auto &&Hsub_T = Hsub.transpose();
                         H_T_H.block< 6, 6 >( 0, 0 ) = Hsub_T * Hsub;
+                        auto H_T_H_inverse = H_T_H.block< 6, 6 >( 0, 0 ).inverse();
+
+                        // degredation detection
+                        // 特征值分解
+                        Eigen::EigenSolver<Eigen::MatrixXd> solver_rot(H_T_H_inverse.block<3,3>(0,0));
+                        Eigen::EigenSolver<Eigen::MatrixXd> solver_trans(H_T_H_inverse.block<3,3>(3,3));
+                        // Eigen::EigenSolver<Eigen::MatrixXd> solver(H_T_H.block<6,6>(0,0));
+
+                        // 获取特征值和特征向量矩阵
+                        Eigen::VectorXd eigenvalues_rot = solver_rot.eigenvalues().real();
+                        Eigen::MatrixXd eigenvectors_rot = solver_rot.eigenvectors().real();
+                        double minEigenvalue_rot = solver_rot.eigenvalues().real().minCoeff();
+                        
+
+                        Eigen::VectorXd eigenvalues_trans = solver_trans.eigenvalues().real();
+                        Eigen::MatrixXd eigenvectors_trans = solver_trans.eigenvectors().real();
+                        double minEigenvalue_trans = solver_trans.eigenvalues().real().minCoeff();
+
+                        b_need_cam = false;
+                        // b_need_cam = true;
+                        set_zero_matrix.setZero();
+                        // set_zero_matrix.block<6,6>(0,0).setIdentity();
+                        // b_need_cam = true;
+                        eigenRotation.setIdentity();
+                        eigenRotation.block<3,3>(0,0) = eigenvectors_rot;
+                        eigenRotation.block<3,3>(3,3) = eigenvectors_trans;
+
+                        for (int i = 0; i < 3; ++i) {
+                            // std::cout << eigenvalues_rot(i) <<"  ";
+                            if (eigenvalues_rot(i) / minEigenvalue_rot >100 || eigenvalues_rot(i) >0.1) {
+                                b_need_cam = true;
+                                // std::cout<<"rotation degrated" <<std::endl;
+                                // eigenvalues(i) = 1.0;  // 将小于6.0的特征值置为0
+                                set_zero_matrix(i,i) = 1.0;
+                            }
+                        }
+                        // std::cout<<std::endl<<"eigenTrans: ";
+                        for (int i = 0; i < 3; ++i) {
+                            // std::cout << eigenvalues_trans(i) <<"  ";
+                            if ( eigenvalues_trans(i) / minEigenvalue_trans >10 || eigenvalues_trans(i) >0.06) {
+                                b_need_cam = true;
+                                // std::cout<<"trans degrated" <<std::endl;
+                                set_zero_matrix(i+3,i+3) = 1.0;
+                            }
+                        }
+                       
+
                         Eigen::Matrix< double, DIM_OF_STATES, DIM_OF_STATES > &&K_1 =
                             ( H_T_H + ( g_lio_state.cov / LASER_POINT_COV ).inverse() ).inverse();
                         K = K_1.block< DIM_OF_STATES, 6 >( 0, 0 ) * Hsub_T;
@@ -847,7 +901,7 @@ int R3LIVE::service_LIO_update()
                         // }
 
                         g_lio_state = state_propagate + solution;
-                        print_dash_board();
+                        // print_dash_board();
                         // cout << ANSI_COLOR_RED_BOLD << "Run EKF uph, vec = " << vec.head<9>().transpose() << ANSI_COLOR_RESET << endl;
                         rot_add = solution.block< 3, 1 >( 0, 0 );
                         t_add = solution.block< 3, 1 >( 3, 0 );
@@ -943,6 +997,7 @@ int R3LIVE::service_LIO_update()
             }
 
             /******* Publish current frame points in world coordinates:  *******/
+            std::cout<<" lio : "<< std::endl << set_zero_matrix.block<6,6>(0,0) <<std::endl;
             laserCloudFullRes2->clear();
             *laserCloudFullRes2 = dense_map_en ? ( *feats_undistort ) : ( *feats_down );
 
