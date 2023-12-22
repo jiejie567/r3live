@@ -63,12 +63,12 @@ void R3LIVE::imu_cbk( const sensor_msgs::Imu::ConstPtr &msg_in )
 
     last_timestamp_imu = timestamp;
 
-    // if ( g_camera_lidar_queue.m_if_acc_mul_G )
-    // {
-    //     msg->linear_acceleration.x *= G_m_s2;
-    //     msg->linear_acceleration.y *= G_m_s2;
-    //     msg->linear_acceleration.z *= G_m_s2;
-    // }
+    if ( g_camera_lidar_queue.m_if_acc_mul_G )
+    {
+        msg->linear_acceleration.x *= G_m_s2;
+        msg->linear_acceleration.y *= G_m_s2;
+        msg->linear_acceleration.z *= G_m_s2;
+    }
 
     imu_buffer_lio.push_back( msg );
     imu_buffer_vio.push_back( msg );
@@ -165,14 +165,7 @@ bool R3LIVE::sync_packages( MeasureGroup &meas )
         }
         // pcl::fromROSMsg(*(lidar_buffer.front()), *(meas.lidar));
         meas.lidar_beg_time = lidar_buffer.front()->header.stamp.toSec();
-        if(meas.lidar->points.back().curvature == 0.0) //for ToFRGBD
-        {
-            lidar_end_time = meas.lidar_beg_time;
-        }
-        else
-        {
-            lidar_end_time = meas.lidar_beg_time + meas.lidar->points.back().curvature / double( 1000 );
-        }
+        lidar_end_time = meas.lidar_beg_time + meas.lidar->points.back().curvature / double( 1000 );
         meas.lidar_end_time = lidar_end_time;
         // printf("Input LiDAR time = %.3f, %.3f\n", meas.lidar_beg_time, meas.lidar_end_time);
         // printf_line_mem_MB;
@@ -207,7 +200,7 @@ bool R3LIVE::sync_packages( MeasureGroup &meas )
 void R3LIVE::pointBodyToWorld( PointType const *const pi, PointType *const po )
 {
     Eigen::Vector3d p_body( pi->x, pi->y, pi->z );
-    Eigen::Vector3d p_global( g_lio_state.rot_end * ( p_body ) + g_lio_state.pos_end );
+    Eigen::Vector3d p_global( g_lio_state.rot_end * ( p_body + Lidar_offset_to_IMU ) + g_lio_state.pos_end );
 
     po->x = p_global( 0 );
     po->y = p_global( 1 );
@@ -218,7 +211,7 @@ void R3LIVE::pointBodyToWorld( PointType const *const pi, PointType *const po )
 void R3LIVE::RGBpointBodyToWorld( PointType const *const pi, pcl::PointXYZI *const po )
 {
     Eigen::Vector3d p_body( pi->x, pi->y, pi->z );
-    Eigen::Vector3d p_global( g_lio_state.rot_end * ( p_body) + g_lio_state.pos_end );
+    Eigen::Vector3d p_global( g_lio_state.rot_end * ( p_body + Lidar_offset_to_IMU ) + g_lio_state.pos_end );
 
     po->x = p_global( 0 );
     po->y = p_global( 1 );
@@ -573,7 +566,7 @@ int R3LIVE::service_LIO_update()
             pca_time = 0;
             svd_time = 0;
             t0 = omp_get_wtime();
-            p_imu->Process( Measures, g_lio_state, feats_undistort ,m_lidar_ext_R_il, m_lidar_ext_t_il);
+            p_imu->Process( Measures, g_lio_state, feats_undistort );
 
             g_camera_lidar_queue.g_noise_cov_acc = p_imu->cov_acc;
             g_camera_lidar_queue.g_noise_cov_gyro = p_imu->cov_gyr;
@@ -809,7 +802,7 @@ int R3LIVE::service_LIO_update()
                     {
                         const PointType &laser_p = laserCloudOri->points[ i ];
                         Eigen::Vector3d  point_this( laser_p.x, laser_p.y, laser_p.z );
-                        // point_this += Lidar_offset_to_IMU;
+                        point_this += Lidar_offset_to_IMU;
                         Eigen::Matrix3d point_crossmat;
                         point_crossmat << SKEW_SYM_MATRIX( point_this );
 
@@ -825,10 +818,78 @@ int R3LIVE::service_LIO_update()
                         meas_vec( i ) = -norm_p.intensity;
                     }
 
+                    // Perform singular value decomposition (SVD) on Hsub
+                    // Eigen::JacobiSVD<Eigen::MatrixXd> svd(Hsub, Eigen::ComputeFullU | Eigen::ComputeFullV);
+
+                    // Check the singular values and threshold them
+                    // Eigen::MatrixXd cleanMatrix(laserCloudSelNum, laserCloudSelNum);
+                    // cleanMatrix.setIdentity();
+                    // b_need_cam = false;
+                    // std::vector<int> transVector = {0, 1, 2};
+                    // for (int i = 3; i < svd.singularValues().size(); i++)
+                    // {
+                    //     if (std::abs(svd.singularValues()(i)) < 0.3)
+                    //     {
+                    //         b_need_cam = true;
+                    //         cleanMatrix.coeffRef(i, i)=0.0;
+                    //         auto it = std::find(transVector.begin(), transVector.end(), i-3);
+                    //         // for (int value : transVector) {
+                    //         //     std::cout << value << "--";
+                    //         // }
+                    //         // std::cout << std::endl;
+
+                    //         if (it != transVector.end())
+                    //             transVector.erase(it);
+                                // std::cout<<*it<<std::endl;
+                            // Singular value is less than 10, handle accordingly
+                            // (e.g., perform some action or set a flag)
+                    //     }
+                    // }
+                    // if(transVector.size()==1)
+                    // {
+                    //     std::cout << "\033[32m" << "dimension of an angle has degenerated." << "\033[0m" << std::endl;
+                    //     for (int value : transVector) {
+                    //         std::cout << value << "--";
+                    //     }
+                    //     std::cout << std::endl;
+                    //     cleanMatrix.coeffRef(transVector[0], transVector[0])=0.0;
+                    // }
+                    // if(transVector.size()==0)
+                    // {
+                    //     std::cout << "\033[32m" << "what?" << "\033[0m" << std::endl;
+                    //     std::cout << "\033[32m" << svd.singularValues()(3) <<svd.singularValues()(4)<< svd.singularValues()(5) << "\033[0m" << std::endl;
+
+                    //     // cleanMatrix.coeffRef(transVector[0], transVector[0])=0.0;
+                    // }
+                    
+                    // if(b_need_cam)
+                    // {
+                    //     Hsub.setZero();
+                    //     auto start_time = std::chrono::high_resolution_clock::now();
+                    //     Eigen::MatrixXd singularDiagonal(laserCloudSelNum, 6);
+                    //     singularDiagonal.setZero();
+                    //     for(int i=0;i<6;i++)
+                    //     {
+                    //         singularDiagonal.coeffRef(i, i)=svd.singularValues()(i);
+                    //     }
+                    //     Hsub = svd.matrixU() * cleanMatrix * singularDiagonal * svd.matrixV().transpose();
+
+                    //     auto end_time = std::chrono::high_resolution_clock::now();
+                    //     auto duration = std::chrono::duration_cast<std::chrono::microseconds>(end_time - start_time);
+                    //     meas_vec = svd.matrixU() * cleanMatrix * svd.matrixU().transpose() * meas_vec;
+                    //     std::cout << "Time taken by code: " << duration.count() << " microseconds" << std::endl;
+                    // }
+
+
+
                     Eigen::Vector3d                           rot_add, t_add, v_add, bg_add, ba_add, g_add;
                     Eigen::Matrix< double, DIM_OF_STATES, 1 > solution;
                     Eigen::MatrixXd                           K( DIM_OF_STATES, laserCloudSelNum );
-                    
+                    Eigen::Matrix< double, DIM_OF_STATES, DIM_OF_STATES >  K_1;
+                    Eigen::Matrix< double, 6, 6 >  big_rotation_matrix; 
+
+
+
                     /*** Iterative Kalman Filter Update ***/
                     if ( !flg_EKF_inited )
                     {
@@ -842,7 +903,6 @@ int R3LIVE::service_LIO_update()
                         auto &&Hsub_T = Hsub.transpose();
                         H_T_H.block< 6, 6 >( 0, 0 ) = Hsub_T * Hsub;
                         auto H_T_H_inverse = H_T_H.block< 6, 6 >( 0, 0 ).inverse();
-
                         // degredation detection
                         // 特征值分解
                         Eigen::EigenSolver<Eigen::MatrixXd> solver_rot(H_T_H_inverse.block<3,3>(0,0));
@@ -853,47 +913,102 @@ int R3LIVE::service_LIO_update()
                         Eigen::VectorXd eigenvalues_rot = solver_rot.eigenvalues().real();
                         Eigen::MatrixXd eigenvectors_rot = solver_rot.eigenvectors().real();
                         double minEigenvalue_rot = solver_rot.eigenvalues().real().minCoeff();
+                        // Eigen::VectorXd eigenvalues = solver.eigenvalues().real();
+                        // eigenvectors = solver.eigenvectors().real();
                         
 
                         Eigen::VectorXd eigenvalues_trans = solver_trans.eigenvalues().real();
                         Eigen::MatrixXd eigenvectors_trans = solver_trans.eigenvectors().real();
                         double minEigenvalue_trans = solver_trans.eigenvalues().real().minCoeff();
 
+
+
+                        // double condition_number_rot = eigenvalues_rot.maxCoeff()/eigenvalues_rot.minCoeff();
+                        // double condition_number_trans = eigenvalues_trans.maxCoeff()/eigenvalues_trans.minCoeff();
+                        // std::cout << "特征值：" << std::endl << eigenvalues << std::endl;
+                        // std::cout << "特征向量矩阵：" << std::endl << eigenvectors << std::endl;
+
+                        // Eigen::Matrix<double, 6, 1> V = H_T_H.block<6,6>(0,0).eigenvalues().real();
                         b_need_cam = false;
-                        // b_need_cam = true;
-                        set_zero_matrix.setZero();
+                        // std::cout<<"rot condition: " << condition_number_rot<<std::endl;
+                        // std::cout<<"min rot value: " << eigenvalues_rot.minCoeff()<<std::endl;
+
+                        // std::cout<<"trans condition: " << condition_number_trans<<std::endl;
+                        // std::cout<<"min trans value: " << eigenvalues_trans.minCoeff()<< std::endl;
+                        b_need_cam = true;
+                        set_zero_matrix.setIdentity();
                         // set_zero_matrix.block<6,6>(0,0).setIdentity();
                         // b_need_cam = true;
                         eigenRotation.setIdentity();
                         eigenRotation.block<3,3>(0,0) = eigenvectors_rot;
                         eigenRotation.block<3,3>(3,3) = eigenvectors_trans;
-
+                        std::cout<<std::endl<<"eigenRotation: ";
                         for (int i = 0; i < 3; ++i) {
-                            // std::cout << eigenvalues_rot(i) <<"  ";
-                            if (eigenvalues_rot(i) / minEigenvalue_rot >100 || eigenvalues_rot(i) >0.1) {
+                            std::cout << eigenvalues_rot(i) <<"  ";
+                            if (eigenvalues_rot(i) / minEigenvalue_rot >100 || eigenvalues_rot(i) >0.03) {
                                 b_need_cam = true;
                                 // std::cout<<"rotation degrated" <<std::endl;
                                 // eigenvalues(i) = 1.0;  // 将小于6.0的特征值置为0
                                 set_zero_matrix(i,i) = 1.0;
                             }
                         }
-                        // std::cout<<std::endl<<"eigenTrans: ";
+                        std::cout<<std::endl<<"eigenTrans: ";
                         for (int i = 0; i < 3; ++i) {
-                            // std::cout << eigenvalues_trans(i) <<"  ";
-                            if ( eigenvalues_trans(i) / minEigenvalue_trans >10 || eigenvalues_trans(i) >0.06) {
+                            std::cout << eigenvalues_trans(i) <<"  ";
+                            if ( eigenvalues_trans(i) / minEigenvalue_trans >10 || eigenvalues_trans(i) >0.1) {
                                 b_need_cam = true;
                                 // std::cout<<"trans degrated" <<std::endl;
                                 set_zero_matrix(i+3,i+3) = 1.0;
                             }
                         }
-                       
+                        // H_T_H.setZero();
+                        // H_T_H.block<6,6>(0,0) = eigenvectors * eigenvalues.asDiagonal() * eigenvectors.transpose();
 
-                        Eigen::Matrix< double, DIM_OF_STATES, DIM_OF_STATES > &&K_1 =
+                        // H_T_H.block<3,3>(0,0) = eigenvectors_rot * eigenvalues_rot.asDiagonal() * eigenvectors_rot.transpose();
+                        // H_T_H.block<3,3>(3,3) = eigenvectors_trans * eigenvalues_trans.asDiagonal() * eigenvectors_trans.transpose();
+
+                        // if(eigenvalues_rot.minCoeff()<6.0) //condition_number_rot>100 || 
+                        // {
+                        //     b_need_cam = true;
+
+                        //     // cout<<"\033[1;32m!!!!!! Degeneration Happend, eigen values: \033[0m"<<V.transpose()<<endl;
+                        //     // EKF_stop_flg = true;
+                        //     // solution.block<6,1>(9,0).setZero();
+                        //     // H_T_H.block<6,6>(0,0).setZero();
+                        //     // H_T_H.block<6,6>(0,0).diagonal() = eigenvalues;
+                        //     // H_T_H.block<6,6>(0,0) = eigenvectors * H_T_H.block<6,6>(0,0) * eigenvectors.inverse();
+                        // }
+                        // if( eigenvalues_trans.minCoeff()<6.0) //condition_number_trans>8 ||
+                        // {
+                        //     b_need_cam = true;
+
+                        //     // cout<<"\033[1;32m!!!!!! Degeneration Happend, eigen values: \033[0m"<<V.transpose()<<endl;
+                        //     // EKF_stop_flg = true;
+                        //     // solution.block<6,1>(9,0).setZero();
+                        //     // H_T_H.block<6,6>(0,0).setZero();
+                        //     // H_T_H.block<6,6>(0,0).diagonal() = eigenvalues;
+                        //     // H_T_H.block<6,6>(0,0) = eigenvectors * H_T_H.block<6,6>(0,0) * eigenvectors.inverse();
+                        // }
+
+                        K_1 =
                             ( H_T_H + ( g_lio_state.cov / LASER_POINT_COV ).inverse() ).inverse();
-                        K = K_1.block< DIM_OF_STATES, 6 >( 0, 0 ) * Hsub_T;
+                        // std::cout<< "K_1*K_1.inverse :"<< std::endl<< K_1*K_1.inverse() << std::endl << std::endl;
 
                         auto vec = state_propagate - g_lio_state;
-                        solution = K * ( meas_vec - Hsub * vec.block< 6, 1 >( 0, 0 ) );
+
+                        Eigen::Matrix< double, 6, 1 > Hsub_T_meas = Hsub_T * meas_vec;
+                        // if(b_need_cam)
+                        // {   
+                            // big_rotation_matrix.setZero();
+                            // big_rotation_matrix.block<6,6>(0,0) = eigenvectors;
+                            // big_rotation_matrix.block<3,3>(0,0) = eigenvectors_rot;
+                            // big_rotation_matrix.block<3,3>(3,3) = eigenvectors_trans;
+                            // Hsub_T_meas = big_rotation_matrix * set_zero_matrix * big_rotation_matrix.transpose() * Hsub_T_meas;
+
+                        // }
+                        solution = K_1.block< DIM_OF_STATES, 6 >( 0, 0 )*(Hsub_T_meas - H_T_H.block<6,6>(0,0)*vec.block< 6, 1 >( 0, 0 ));
+                        // K = K_1.block< DIM_OF_STATES, 6 >( 0, 0 ) * Hsub_T;
+                        // solution = K * ( meas_vec - Hsub * vec.block< 6, 1 >( 0, 0 ) );
                         // double speed_delta = solution.block( 0, 6, 3, 1 ).norm();
                         // if(solution.block( 0, 6, 3, 1 ).norm() > 0.05 )
                         // {
@@ -935,7 +1050,8 @@ int R3LIVE::service_LIO_update()
                         if ( flg_EKF_inited )
                         {
                             /*** Covariance Update ***/
-                            G.block< DIM_OF_STATES, 6 >( 0, 0 ) = K * Hsub;
+                            G.block< DIM_OF_STATES, 6 >( 0, 0 ) = K_1.block< DIM_OF_STATES, 6 >( 0, 0 ) * (H_T_H.block< 6, 6 >(0,0));
+                            // G.block< DIM_OF_STATES, 6 >( 0, 0 ) = K * Hsub;
                             g_lio_state.cov = ( I_STATE - G ) * g_lio_state.cov;
                             total_distance += ( g_lio_state.pos_end - position_last ).norm();
                             position_last = g_lio_state.pos_end;
@@ -997,12 +1113,11 @@ int R3LIVE::service_LIO_update()
             }
 
             /******* Publish current frame points in world coordinates:  *******/
-            std::cout<<" lio : "<< std::endl << set_zero_matrix.block<6,6>(0,0) <<std::endl;
             laserCloudFullRes2->clear();
             *laserCloudFullRes2 = dense_map_en ? ( *feats_undistort ) : ( *feats_down );
 
             int laserCloudFullResNum = laserCloudFullRes2->points.size();
-
+            std::cout<<" lio : "<< std::endl << set_zero_matrix.block<6,6>(0,0) <<std::endl;
             pcl::PointXYZI temp_point;
             laserCloudFullResColor->clear();
             {

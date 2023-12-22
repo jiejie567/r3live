@@ -117,6 +117,8 @@ extern StatesGroup g_lio_state;
 extern bool b_need_cam;
 extern Eigen::Matrix< double, DIM_OF_STATES, DIM_OF_STATES > eigenRotation;
 extern Eigen::Matrix< double, DIM_OF_STATES, DIM_OF_STATES >  set_zero_matrix; 
+
+
 extern std::shared_ptr<ImuProcess> g_imu_process;
 extern double g_lidar_star_tim;
 
@@ -263,7 +265,7 @@ public:
     int m_pub_pt_minimum_views = 5;
     double m_recent_visited_voxel_activated_time = 0.0;
     int m_number_of_new_visited_voxel = 0;
-    double m_tracker_minimum_depth = 0.5;
+    double m_tracker_minimum_depth = 3;
     double m_tracker_maximum_depth = 200;
     int m_if_record_mvs = 0;
     cv::Mat intrinsic, dist_coeffs;
@@ -274,8 +276,6 @@ public:
     Eigen::Matrix<double, 5, 1> m_camera_dist_coeffs;
     Eigen::Matrix<double, 3, 3, Eigen::RowMajor> m_camera_ext_R;
     Eigen::Matrix<double, 3, 1> m_camera_ext_t;
-    Eigen::Matrix<double, 3, 3, Eigen::RowMajor> m_lidar_ext_R_il;
-    Eigen::Matrix<double, 3, 1> m_lidar_ext_t_il;
 
     double m_image_downsample_ratio = 1.0;
     nav_msgs::Path camera_path;
@@ -436,7 +436,7 @@ public:
     void pointBodyToWorld(const Eigen::Matrix<T, 3, 1> &pi, Eigen::Matrix<T, 3, 1> &po)
     {
         Eigen::Vector3d p_body(pi[0], pi[1], pi[2]);
-        Eigen::Vector3d p_global(g_lio_state.rot_end * (p_body) + g_lio_state.pos_end);
+        Eigen::Vector3d p_global(g_lio_state.rot_end * (p_body + Lidar_offset_to_IMU) + g_lio_state.pos_end);
         po[0] = p_global(0);
         po[1] = p_global(1);
         po[2] = p_global(2);

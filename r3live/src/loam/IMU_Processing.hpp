@@ -40,7 +40,7 @@ class ImuProcess
   ImuProcess();
   ~ImuProcess();
 
-  void Process(const MeasureGroup &meas, StatesGroup &state, PointCloudXYZINormal::Ptr pcl_un_,  Eigen::Matrix<double, 3, 3, Eigen::RowMajor> lidar_ext_R_il, Eigen::Matrix<double, 3, 1> lidar_ext_t_il);
+  void Process(const MeasureGroup &meas, StatesGroup &state, PointCloudXYZINormal::Ptr pcl_un_);
   void Reset();
   void IMU_Initial(const MeasureGroup &meas, StatesGroup &state, int &N);
 
@@ -50,10 +50,9 @@ class ImuProcess
 
   void UndistortPcl(const MeasureGroup &meas, StatesGroup &state_inout, PointCloudXYZINormal &pcl_in_out);
   void lic_state_propagate(const MeasureGroup &meas, StatesGroup &state_inout);
-  void lic_point_cloud_undistort(const MeasureGroup &meas,  const StatesGroup &state_inout, PointCloudXYZINormal &pcl_out, Eigen::Matrix<double, 3, 3, Eigen::RowMajor> lidar_ext_R_il, Eigen::Matrix<double, 3, 1> lidar_ext_t_il);
+  void lic_point_cloud_undistort(const MeasureGroup &meas,  const StatesGroup &state_inout, PointCloudXYZINormal &pcl_out);
   StatesGroup imu_preintegration(const StatesGroup & state_inout, std::deque<sensor_msgs::Imu::ConstPtr> & v_imu,  double end_pose_dt = 0);
   ros::NodeHandle nh;
-  double mean_acc_norm;
 
   void Integrate(const sensor_msgs::ImuConstPtr &imu);
   void Reset(double start_timestamp, const sensor_msgs::ImuConstPtr &lastimu);
@@ -76,7 +75,7 @@ class ImuProcess
   int init_iter_num = 1;
   Eigen::Vector3d mean_acc;
   Eigen::Vector3d mean_gyr;
-  double last_lidar_end_time_;
+
   /*** Undistorted pointcloud ***/
   PointCloudXYZINormal::Ptr cur_pcl_un_;
 

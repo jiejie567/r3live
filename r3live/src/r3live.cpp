@@ -91,6 +91,9 @@ bool b_need_cam = false;
 Eigen::Matrix< double, DIM_OF_STATES, DIM_OF_STATES > eigenRotation;
 Eigen::Matrix< double, DIM_OF_STATES, DIM_OF_STATES >  set_zero_matrix; 
 
+
+
+
 std::string data_dump_dir = std::string("/mnt/0B3B134F0B3B134F/color_temp_r3live/");
 
 int main(int argc, char **argv)

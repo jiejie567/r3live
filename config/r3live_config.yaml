@@ -2,7 +2,7 @@ Lidar_front_end:
    lidar_type: 1   # 1 for Livox-avia, 3 for Ouster-OS1-64
    N_SCANS: 6
    using_raw_point: 1
-   point_step: 5
+   point_step: 1
    
 r3live_common:
    if_dump_log: 1                   # If recording ESIKF update log. [default = 0]
@@ -38,16 +38,10 @@ r3live_vio:
    # camera_ext_t: [0,0,0] 
    
 r3live_lio:        
-   lio_update_point_step: 4   # Point step used for LIO update.  
-   max_iteration: 2           # Maximum times of LIO esikf.
+   lio_update_point_step: 2   # Point step used for LIO update.  
+   max_iteration: 4           # Maximum times of LIO esikf.
    lidar_time_delay: 0        # The time-offset between LiDAR and IMU, provided by user. 
-   filter_size_corner: 0.10   
-   filter_size_surf: 0.10
-   filter_size_surf_z: 0.10
-   filter_size_map: 0.10
-   lidar_ext_R_il: #actually , camera imu 
-         [1.0, 0.0, 0.0,
-            0.0, 1.0, 0.0,
-            0.0, 0.0, 1.0]
-   # camera_ext_t: [0.050166, 0.0474116, -0.0312415] 
-   lidar_ext_t_il: [0.04165, 0.02326, -0.0284]
+   filter_size_corner: 0.05
+   voxel_downsample_size_surf:  0.3
+
+   filter_size_map: 0.3

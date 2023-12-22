@@ -441,15 +441,13 @@ void   R3LIVE::process_image( cv::Mat &temp_img, double msg_time )
 void R3LIVE::load_vio_parameters()
 {
 
-    std::vector< double > camera_intrinsic_data, camera_dist_coeffs_data, camera_ext_R_data, camera_ext_t_data, lidar_ext_R_il_data, lidar_ext_t_il_data;
+    std::vector< double > camera_intrinsic_data, camera_dist_coeffs_data, camera_ext_R_data, camera_ext_t_data;
     m_ros_node_handle.getParam( "r3live_vio/image_width", m_vio_image_width );
     m_ros_node_handle.getParam( "r3live_vio/image_height", m_vio_image_heigh );
     m_ros_node_handle.getParam( "r3live_vio/camera_intrinsic", camera_intrinsic_data );
     m_ros_node_handle.getParam( "r3live_vio/camera_dist_coeffs", camera_dist_coeffs_data );
     m_ros_node_handle.getParam( "r3live_vio/camera_ext_R", camera_ext_R_data );
     m_ros_node_handle.getParam( "r3live_vio/camera_ext_t", camera_ext_t_data );
-    m_ros_node_handle.getParam( "r3live_lio/lidar_ext_R_il", lidar_ext_R_il_data );//lio
-    m_ros_node_handle.getParam( "r3live_lio/lidar_ext_t_il", lidar_ext_t_il_data );//lio
 
     CV_Assert( ( m_vio_image_width != 0 && m_vio_image_heigh != 0 ) );
 
@@ -468,8 +466,6 @@ void R3LIVE::load_vio_parameters()
     m_camera_dist_coeffs = Eigen::Map< Eigen::Matrix< double, 5, 1 > >( camera_dist_coeffs_data.data() );
     m_camera_ext_R = Eigen::Map< Eigen::Matrix< double, 3, 3, Eigen::RowMajor > >( camera_ext_R_data.data() );
     m_camera_ext_t = Eigen::Map< Eigen::Matrix< double, 3, 1 > >( camera_ext_t_data.data() );
-    m_lidar_ext_R_il = Eigen::Map< Eigen::Matrix< double, 3, 3, Eigen::RowMajor > >( lidar_ext_R_il_data.data() );
-    m_lidar_ext_t_il = Eigen::Map< Eigen::Matrix< double, 3, 1 > >( lidar_ext_t_il_data.data() );
 
     cout << "[Ros_parameter]: r3live_vio/Camera Intrinsic: " << endl;
     cout << m_camera_intrinsic << endl;
