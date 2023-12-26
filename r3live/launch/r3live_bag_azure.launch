@@ -4,8 +4,8 @@
 
     <!-- Subscribed topics -->
     <param name="/LiDAR_pointcloud_topic" type="string" value= "/laser_cloud_flat" />
-    <param name="/IMU_topic" type="string" value= "/imu" />
-    <param name="/Image_topic" type="string" value= "/rgb/image_raw" />
+    <param name="/IMU_topic" type="string" value= "/front/imu" />
+    <param name="/Image_topic" type="string" value= "/front/rgb/image" />
     <param name="map_output_dir" type="string" value="$(env HOME)/r3live_output" />
     <rosparam command="load" file="$(find r3live)/../config/r3live_azure_config.yaml" />
     
@@ -19,7 +19,7 @@
         <node name="rvizvisualisation" pkg="rviz" type="rviz" output="log" args="-d $(find r3live)/../config/rviz/r3live_rviz_config_ouster.rviz" />
     </group>
 
-    <arg name="bag_name" value="/home/jeff/Downloads/dataset/azure_office.bag"/>
-	<node pkg="rosbag" type="play" name="rosbag" args=" -r 1.0 -s 0.0 $(arg bag_name) --clock" />
+    <arg name="bag_name" value="/home/jeff/Downloads/室外.bag"/>
+	<node pkg="rosbag" type="play" name="rosbag" args=" -r 2.0 -s 0.0 $(arg bag_name) --clock" />
 
  </launch>

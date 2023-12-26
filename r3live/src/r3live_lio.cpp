@@ -870,7 +870,7 @@ int R3LIVE::service_LIO_update()
 
                         for (int i = 0; i < 3; ++i) {
                             // std::cout << eigenvalues_rot(i) <<"  ";
-                            if (eigenvalues_rot(i) / minEigenvalue_rot >100 || eigenvalues_rot(i) >0.1) {
+                            if (eigenvalues_rot(i) / minEigenvalue_rot >10 || eigenvalues_rot(i) >0.1) {
                                 b_need_cam = true;
                                 // std::cout<<"rotation degrated" <<std::endl;
                                 // eigenvalues(i) = 1.0;  // 将小于6.0的特征值置为0

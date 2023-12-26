@@ -67,6 +67,7 @@ struct orgtype
 
 const double rad2deg = 180 * M_1_PI;
 
+string lidar_topic;
 int    lidar_type;
 double blind, inf_bound;
 int    N_SCANS;
@@ -98,6 +99,7 @@ int main( int argc, char **argv )
     ros::init( argc, argv, "feature_extract" );
     ros::NodeHandle n;
 
+    n.param< string >( "Lidar_front_end/lidar_topic", lidar_topic, "/livox/points" );
     n.param< int >( "Lidar_front_end/lidar_type", lidar_type, 0 );
     n.param< double >( "Lidar_front_end/blind", blind, 0.25 );
     n.param< double >( "Lidar_front_end/inf_bound", inf_bound, 4 );
@@ -151,7 +153,7 @@ int main( int argc, char **argv )
 
     case ToFRGBD:
         printf( "ToFRGBD\n" );
-        sub_points = n.subscribe( "/points2", 1000, ToFRGBD_handler, ros::TransportHints().tcpNoDelay() );
+        sub_points = n.subscribe( lidar_topic, 1000, ToFRGBD_handler, ros::TransportHints().tcpNoDelay() );
         break;
 
     default:

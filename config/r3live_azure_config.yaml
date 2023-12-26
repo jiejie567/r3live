@@ -1,9 +1,10 @@
 Lidar_front_end:
+   # lidar_topic: /3rgbd/points2
+   lidar_topic: /front/points2_in_front
    lidar_type: 4   # 1 for Livox-avia, 3 for Ouster-OS1-64, 4 for Azure Kinect DK
    N_SCANS: 6
-   using_raw_point: 1
-   point_filter_num: 50
-   point_step: 50
+   using_raw_point: 8
+   point_filter_num: 1
    
 r3live_common:
    if_dump_log: 1                   # If recording ESIKF update log. [default = 0]
@@ -17,11 +18,17 @@ r3live_common:
    append_global_map_point_step: 4  # The point step of append point to global map. [default = 4]
 
 r3live_vio:
-   image_width: 1280
-   image_height: 720
+   # image_width: 1280
+   # image_height: 720
+   image_width: 640
+   image_height: 360
+   # camera_intrinsic:
+   #    [607.778, 0.0, 636.636,
+   #    0.0,  607.751, 368.102,
+   #    0.0, 0.0, 1.0 ] 
    camera_intrinsic:
-      [607.778, 0.0, 636.636,
-      0.0,  607.751, 368.102,
+      [303.85, 0.0, 318.318,
+      0.0,  303.85, 184.51,
       0.0, 0.0, 1.0 ] 
    camera_dist_coeffs: [0.527894, -2.78783, 0.000106269, 2.59275e-05, 1.66303]  #k1, k2, p1, p2, k3
    # Fine extrinsic value. form camera-LiDAR calibration.
@@ -44,8 +51,8 @@ r3live_lio:
    lio_update_point_step: 1   # Point step used for LIO update.  
    max_iteration: 3           # Maximum times of LIO esikf.
    lidar_time_delay: 0        # The time-offset between LiDAR and IMU, provided by user. 
-   voxel_downsample_size_surf: 0.2
-   filter_size_map: 0.2   
+   voxel_downsample_size_surf: 0.3
+   filter_size_map: 0.3   
    lidar_ext_R_il: 
        [ -0.00455602, 0.108595, -0.99407, 
                    -0.999958, -0.00837415, 0.00366818, 
