@@ -22,7 +22,7 @@
 #include "lib_sophus/se3.hpp"
 #include "lib_sophus/so3.hpp"
 // #define DEBUG_PRINT
-#define USE_ikdtree
+#define USE_ikdtree 1
 #define ESTIMATE_GRAVITY  1
 #define ENABLE_CAMERA_OBS 1
 // #define USE_FOV_Checker

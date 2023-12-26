@@ -1,0 +1,18 @@
+{
+    "files.associations": {
+        "future": "cpp",
+        "*.ipp": "cpp",
+        "deque": "cpp",
+        "string": "cpp",
+        "vector": "cpp",
+        "mutex": "cpp",
+        "shared_mutex": "cpp",
+        "condition_variable": "cpp",
+        "iostream": "cpp"
+    },
+    "python.autoComplete.extraPaths": [
+        "/home/jeff/slam_repo/r3live_selective_ws/devel/lib/python3/dist-packages",
+        "/home/jeff/slam_ws/devel/lib/python3/dist-packages",
+        "/opt/ros/noetic/lib/python3/dist-packages"
+    ]
+}

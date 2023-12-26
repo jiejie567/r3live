@@ -52,6 +52,7 @@ Dr. Fu Zhang < fuzhang@hku.hk >.
 #include <thread>
 #include <fstream>
 #include <csignal>
+#include <execution>
 #include <unistd.h>
 #include <so3_math.h>
 #include <ros/ros.h>

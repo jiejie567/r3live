@@ -665,8 +665,15 @@ int R3LIVE::service_LIO_update()
                     laserCloudOri->clear();
                     coeffSel->clear();
 
+                    std::vector<int> index;
+                    for (int i = 0; i < feats_down_size; i += m_lio_update_point_step)
+                    {
+                        index.push_back(i);
+                    }
+
                     /** closest surface search and residual computation **/
-                    for ( int i = 0; i < feats_down_size; i += m_lio_update_point_step )
+//                    for ( int i = 0; i < feats_down_size; i += m_lio_update_point_step )
+                    std::for_each(std::execution::par_unseq, index.begin(), index.end(), [&] (int i)
                     {
                         double     search_start = omp_get_wtime();
                         PointType &pointOri_tmpt = feats_down->points[ i ];
@@ -696,84 +703,85 @@ int R3LIVE::service_LIO_update()
                         }
 
                         kdtree_search_time += omp_get_wtime() - search_start;
-                        if ( point_selected_surf[ i ] == false )
-                            continue;
-
-                        // match_time += omp_get_wtime() - match_start;
-                        double pca_start = omp_get_wtime();
-                        /// PCA (using minimum square method)
-                        cv::Mat matA0( NUM_MATCH_POINTS, 3, CV_32F, cv::Scalar::all( 0 ) );
-                        cv::Mat matB0( NUM_MATCH_POINTS, 1, CV_32F, cv::Scalar::all( -1 ) );
-                        cv::Mat matX0( NUM_MATCH_POINTS, 1, CV_32F, cv::Scalar::all( 0 ) );
-
-                        for ( int j = 0; j < NUM_MATCH_POINTS; j++ )
+                        if ( point_selected_surf[ i ] == true )
                         {
-                            matA0.at< float >( j, 0 ) = points_near[ j ].x;
-                            matA0.at< float >( j, 1 ) = points_near[ j ].y;
-                            matA0.at< float >( j, 2 ) = points_near[ j ].z;
-                        }
+                            // match_time += omp_get_wtime() - match_start;
+                            double pca_start = omp_get_wtime();
+                            /// PCA (using minimum square method)
+                            cv::Mat matA0( NUM_MATCH_POINTS, 3, CV_32F, cv::Scalar::all( 0 ) );
+                            cv::Mat matB0( NUM_MATCH_POINTS, 1, CV_32F, cv::Scalar::all( -1 ) );
+                            cv::Mat matX0( NUM_MATCH_POINTS, 1, CV_32F, cv::Scalar::all( 0 ) );
 
-                        cv::solve( matA0, matB0, matX0, cv::DECOMP_QR ); // TODO
-
-                        float pa = matX0.at< float >( 0, 0 );
-                        float pb = matX0.at< float >( 1, 0 );
-                        float pc = matX0.at< float >( 2, 0 );
-                        float pd = 1;
-
-                        float ps = sqrt( pa * pa + pb * pb + pc * pc );
-                        pa /= ps;
-                        pb /= ps;
-                        pc /= ps;
-                        pd /= ps;
-
-                        bool planeValid = true;
-                        for ( int j = 0; j < NUM_MATCH_POINTS; j++ )
-                        {
-                            // ANCHOR -  Planar check
-                            if ( fabs( pa * points_near[ j ].x + pb * points_near[ j ].y + pc * points_near[ j ].z + pd ) >
-                                 m_planar_check_dis ) // Raw 0.05
+                            for ( int j = 0; j < NUM_MATCH_POINTS; j++ )
                             {
-                                // ANCHOR - Far distance pt processing
-                                if ( ori_pt_dis < maximum_pt_range * 0.90 || ( ori_pt_dis < m_long_rang_pt_dis ) )
-                                // if(1)
+                                matA0.at< float >( j, 0 ) = points_near[ j ].x;
+                                matA0.at< float >( j, 1 ) = points_near[ j ].y;
+                                matA0.at< float >( j, 2 ) = points_near[ j ].z;
+                            }
+
+                            cv::solve( matA0, matB0, matX0, cv::DECOMP_QR ); // TODO
+
+                            float pa = matX0.at< float >( 0, 0 );
+                            float pb = matX0.at< float >( 1, 0 );
+                            float pc = matX0.at< float >( 2, 0 );
+                            float pd = 1;
+
+                            float ps = sqrt( pa * pa + pb * pb + pc * pc );
+                            pa /= ps;
+                            pb /= ps;
+                            pc /= ps;
+                            pd /= ps;
+
+                            bool planeValid = true;
+                            for ( int j = 0; j < NUM_MATCH_POINTS; j++ )
+                            {
+                                // ANCHOR -  Planar check
+                                if ( fabs( pa * points_near[ j ].x + pb * points_near[ j ].y + pc * points_near[ j ].z + pd ) >
+                                     m_planar_check_dis ) // Raw 0.05
                                 {
-                                    planeValid = false;
-                                    point_selected_surf[ i ] = false;
-                                    break;
+                                    // ANCHOR - Far distance pt processing
+                                    if ( ori_pt_dis < maximum_pt_range * 0.90 || ( ori_pt_dis < m_long_rang_pt_dis ) )
+                                        // if(1)
+                                    {
+                                        planeValid = false;
+                                        point_selected_surf[ i ] = false;
+                                        break;
+                                    }
                                 }
                             }
-                        }
 
-                        if ( planeValid )
-                        {
-                            float pd2 = pa * pointSel_tmpt.x + pb * pointSel_tmpt.y + pc * pointSel_tmpt.z + pd;
-                            float s = 1 - 0.9 * fabs( pd2 ) /
+                            if ( planeValid )
+                            {
+                                float pd2 = pa * pointSel_tmpt.x + pb * pointSel_tmpt.y + pc * pointSel_tmpt.z + pd;
+                                float s = 1 - 0.9 * fabs( pd2 ) /
                                               sqrt( sqrt( pointSel_tmpt.x * pointSel_tmpt.x + pointSel_tmpt.y * pointSel_tmpt.y +
                                                           pointSel_tmpt.z * pointSel_tmpt.z ) );
-                            // ANCHOR -  Point to plane distance
-                            double acc_distance = ( ori_pt_dis < m_long_rang_pt_dis ) ? m_maximum_res_dis : 1.0;
-                            if ( pd2 < acc_distance )
-                            {
-                                // if(std::abs(pd2) > 5 * res_mean_last)
-                                // {
-                                //     point_selected_surf[i] = false;
-                                //     res_last[i] = 0.0;
-                                //     continue;
-                                // }
-                                point_selected_surf[ i ] = true;
-                                coeffSel_tmpt->points[ i ].x = pa;
-                                coeffSel_tmpt->points[ i ].y = pb;
-                                coeffSel_tmpt->points[ i ].z = pc;
-                                coeffSel_tmpt->points[ i ].intensity = pd2;
-                                res_last[ i ] = std::abs( pd2 );
+                                // ANCHOR -  Point to plane distance
+                                double acc_distance = ( ori_pt_dis < m_long_rang_pt_dis ) ? m_maximum_res_dis : 1.0;
+                                if ( pd2 < acc_distance )
+                                {
+                                    // if(std::abs(pd2) > 5 * res_mean_last)
+                                    // {
+                                    //     point_selected_surf[i] = false;
+                                    //     res_last[i] = 0.0;
+                                    //     continue;
+                                    // }
+                                    point_selected_surf[ i ] = true;
+                                    coeffSel_tmpt->points[ i ].x = pa;
+                                    coeffSel_tmpt->points[ i ].y = pb;
+                                    coeffSel_tmpt->points[ i ].z = pc;
+                                    coeffSel_tmpt->points[ i ].intensity = pd2;
+                                    res_last[ i ] = std::abs( pd2 );
+                                }
+                                else
+                                {
+                                    point_selected_surf[ i ] = false;
+                                }
                             }
-                            else
-                            {
-                                point_selected_surf[ i ] = false;
-                            }
+                            pca_time += omp_get_wtime() - pca_start;
                         }
-                        pca_time += omp_get_wtime() - pca_start;
-                    }
+
+                    });
                     tim.tic( "Stack" );
                     double total_residual = 0.0;
                     laserCloudSelNum = 0;
@@ -788,6 +796,7 @@ int R3LIVE::service_LIO_update()
                             laserCloudSelNum++;
                         }
                     }
+                   std::cout<<"laserCloudSelNum:"<<laserCloudSelNum<<std::endl;
                     res_mean_last = total_residual / laserCloudSelNum;
 
                     match_time += omp_get_wtime() - match_start;
@@ -798,7 +807,13 @@ int R3LIVE::service_LIO_update()
                     Eigen::VectorXd meas_vec( laserCloudSelNum );
                     Hsub.setZero();
 
-                    for ( int i = 0; i < laserCloudSelNum; i++ )
+                    std::vector<int> index_laserCloudSelNum;
+                    for (int i = 0; i < laserCloudSelNum; i++)
+                    {
+                        index_laserCloudSelNum.push_back(i);
+                    }
+//                    for ( int i = 0; i < laserCloudSelNum; i++ )
+                    std::for_each(std::execution::par_unseq, index_laserCloudSelNum.begin(), index_laserCloudSelNum.end(), [&] (int i)
                     {
                         const PointType &laser_p = laserCloudOri->points[ i ];
                         Eigen::Vector3d  point_this( laser_p.x, laser_p.y, laser_p.z );
@@ -816,71 +831,7 @@ int R3LIVE::service_LIO_update()
 
                         /*** Measuremnt: distance to the closest surface/corner ***/
                         meas_vec( i ) = -norm_p.intensity;
-                    }
-
-                    // Perform singular value decomposition (SVD) on Hsub
-                    // Eigen::JacobiSVD<Eigen::MatrixXd> svd(Hsub, Eigen::ComputeFullU | Eigen::ComputeFullV);
-
-                    // Check the singular values and threshold them
-                    // Eigen::MatrixXd cleanMatrix(laserCloudSelNum, laserCloudSelNum);
-                    // cleanMatrix.setIdentity();
-                    // b_need_cam = false;
-                    // std::vector<int> transVector = {0, 1, 2};
-                    // for (int i = 3; i < svd.singularValues().size(); i++)
-                    // {
-                    //     if (std::abs(svd.singularValues()(i)) < 0.3)
-                    //     {
-                    //         b_need_cam = true;
-                    //         cleanMatrix.coeffRef(i, i)=0.0;
-                    //         auto it = std::find(transVector.begin(), transVector.end(), i-3);
-                    //         // for (int value : transVector) {
-                    //         //     std::cout << value << "--";
-                    //         // }
-                    //         // std::cout << std::endl;
-
-                    //         if (it != transVector.end())
-                    //             transVector.erase(it);
-                                // std::cout<<*it<<std::endl;
-                            // Singular value is less than 10, handle accordingly
-                            // (e.g., perform some action or set a flag)
-                    //     }
-                    // }
-                    // if(transVector.size()==1)
-                    // {
-                    //     std::cout << "\033[32m" << "dimension of an angle has degenerated." << "\033[0m" << std::endl;
-                    //     for (int value : transVector) {
-                    //         std::cout << value << "--";
-                    //     }
-                    //     std::cout << std::endl;
-                    //     cleanMatrix.coeffRef(transVector[0], transVector[0])=0.0;
-                    // }
-                    // if(transVector.size()==0)
-                    // {
-                    //     std::cout << "\033[32m" << "what?" << "\033[0m" << std::endl;
-                    //     std::cout << "\033[32m" << svd.singularValues()(3) <<svd.singularValues()(4)<< svd.singularValues()(5) << "\033[0m" << std::endl;
-
-                    //     // cleanMatrix.coeffRef(transVector[0], transVector[0])=0.0;
-                    // }
-                    
-                    // if(b_need_cam)
-                    // {
-                    //     Hsub.setZero();
-                    //     auto start_time = std::chrono::high_resolution_clock::now();
-                    //     Eigen::MatrixXd singularDiagonal(laserCloudSelNum, 6);
-                    //     singularDiagonal.setZero();
-                    //     for(int i=0;i<6;i++)
-                    //     {
-                    //         singularDiagonal.coeffRef(i, i)=svd.singularValues()(i);
-                    //     }
-                    //     Hsub = svd.matrixU() * cleanMatrix * singularDiagonal * svd.matrixV().transpose();
-
-                    //     auto end_time = std::chrono::high_resolution_clock::now();
-                    //     auto duration = std::chrono::duration_cast<std::chrono::microseconds>(end_time - start_time);
-                    //     meas_vec = svd.matrixU() * cleanMatrix * svd.matrixU().transpose() * meas_vec;
-                    //     std::cout << "Time taken by code: " << duration.count() << " microseconds" << std::endl;
-                    // }
-
-
+                    });
 
                     Eigen::Vector3d                           rot_add, t_add, v_add, bg_add, ba_add, g_add;
                     Eigen::Matrix< double, DIM_OF_STATES, 1 > solution;
@@ -922,29 +873,16 @@ int R3LIVE::service_LIO_update()
                         double minEigenvalue_trans = solver_trans.eigenvalues().real().minCoeff();
 
 
-
-                        // double condition_number_rot = eigenvalues_rot.maxCoeff()/eigenvalues_rot.minCoeff();
-                        // double condition_number_trans = eigenvalues_trans.maxCoeff()/eigenvalues_trans.minCoeff();
-                        // std::cout << "特征值：" << std::endl << eigenvalues << std::endl;
-                        // std::cout << "特征向量矩阵：" << std::endl << eigenvectors << std::endl;
-
-                        // Eigen::Matrix<double, 6, 1> V = H_T_H.block<6,6>(0,0).eigenvalues().real();
                         b_need_cam = false;
-                        // std::cout<<"rot condition: " << condition_number_rot<<std::endl;
-                        // std::cout<<"min rot value: " << eigenvalues_rot.minCoeff()<<std::endl;
 
-                        // std::cout<<"trans condition: " << condition_number_trans<<std::endl;
-                        // std::cout<<"min trans value: " << eigenvalues_trans.minCoeff()<< std::endl;
-                        b_need_cam = true;
-                        set_zero_matrix.setIdentity();
-                        // set_zero_matrix.block<6,6>(0,0).setIdentity();
                         // b_need_cam = true;
+                        set_zero_matrix.setZero();
                         eigenRotation.setIdentity();
                         eigenRotation.block<3,3>(0,0) = eigenvectors_rot;
                         eigenRotation.block<3,3>(3,3) = eigenvectors_trans;
-                        std::cout<<std::endl<<"eigenRotation: ";
+                        // std::cout<<std::endl<<"eigenRotation: ";
                         for (int i = 0; i < 3; ++i) {
-                            std::cout << eigenvalues_rot(i) <<"  ";
+                            // std::cout << eigenvalues_rot(i) <<"  ";
                             if (eigenvalues_rot(i) / minEigenvalue_rot >100 || eigenvalues_rot(i) >0.03) {
                                 b_need_cam = true;
                                 // std::cout<<"rotation degrated" <<std::endl;
@@ -952,68 +890,24 @@ int R3LIVE::service_LIO_update()
                                 set_zero_matrix(i,i) = 1.0;
                             }
                         }
-                        std::cout<<std::endl<<"eigenTrans: ";
+                        // std::cout<<std::endl<<"eigenTrans: ";
                         for (int i = 0; i < 3; ++i) {
-                            std::cout << eigenvalues_trans(i) <<"  ";
+//                            std::cout << eigenvalues_trans(i) <<"  ";
                             if ( eigenvalues_trans(i) / minEigenvalue_trans >10 || eigenvalues_trans(i) >0.1) {
                                 b_need_cam = true;
                                 // std::cout<<"trans degrated" <<std::endl;
                                 set_zero_matrix(i+3,i+3) = 1.0;
                             }
                         }
-                        // H_T_H.setZero();
-                        // H_T_H.block<6,6>(0,0) = eigenvectors * eigenvalues.asDiagonal() * eigenvectors.transpose();
-
-                        // H_T_H.block<3,3>(0,0) = eigenvectors_rot * eigenvalues_rot.asDiagonal() * eigenvectors_rot.transpose();
-                        // H_T_H.block<3,3>(3,3) = eigenvectors_trans * eigenvalues_trans.asDiagonal() * eigenvectors_trans.transpose();
-
-                        // if(eigenvalues_rot.minCoeff()<6.0) //condition_number_rot>100 || 
-                        // {
-                        //     b_need_cam = true;
-
-                        //     // cout<<"\033[1;32m!!!!!! Degeneration Happend, eigen values: \033[0m"<<V.transpose()<<endl;
-                        //     // EKF_stop_flg = true;
-                        //     // solution.block<6,1>(9,0).setZero();
-                        //     // H_T_H.block<6,6>(0,0).setZero();
-                        //     // H_T_H.block<6,6>(0,0).diagonal() = eigenvalues;
-                        //     // H_T_H.block<6,6>(0,0) = eigenvectors * H_T_H.block<6,6>(0,0) * eigenvectors.inverse();
-                        // }
-                        // if( eigenvalues_trans.minCoeff()<6.0) //condition_number_trans>8 ||
-                        // {
-                        //     b_need_cam = true;
-
-                        //     // cout<<"\033[1;32m!!!!!! Degeneration Happend, eigen values: \033[0m"<<V.transpose()<<endl;
-                        //     // EKF_stop_flg = true;
-                        //     // solution.block<6,1>(9,0).setZero();
-                        //     // H_T_H.block<6,6>(0,0).setZero();
-                        //     // H_T_H.block<6,6>(0,0).diagonal() = eigenvalues;
-                        //     // H_T_H.block<6,6>(0,0) = eigenvectors * H_T_H.block<6,6>(0,0) * eigenvectors.inverse();
-                        // }
 
                         K_1 =
                             ( H_T_H + ( g_lio_state.cov / LASER_POINT_COV ).inverse() ).inverse();
-                        // std::cout<< "K_1*K_1.inverse :"<< std::endl<< K_1*K_1.inverse() << std::endl << std::endl;
 
                         auto vec = state_propagate - g_lio_state;
 
-                        Eigen::Matrix< double, 6, 1 > Hsub_T_meas = Hsub_T * meas_vec;
-                        // if(b_need_cam)
-                        // {   
-                            // big_rotation_matrix.setZero();
-                            // big_rotation_matrix.block<6,6>(0,0) = eigenvectors;
-                            // big_rotation_matrix.block<3,3>(0,0) = eigenvectors_rot;
-                            // big_rotation_matrix.block<3,3>(3,3) = eigenvectors_trans;
-                            // Hsub_T_meas = big_rotation_matrix * set_zero_matrix * big_rotation_matrix.transpose() * Hsub_T_meas;
-
-                        // }
+                        Eigen::Matrix< double, 6, 1 > Hsub_T_meas = Hsub_T * meas_vec;               
                         solution = K_1.block< DIM_OF_STATES, 6 >( 0, 0 )*(Hsub_T_meas - H_T_H.block<6,6>(0,0)*vec.block< 6, 1 >( 0, 0 ));
-                        // K = K_1.block< DIM_OF_STATES, 6 >( 0, 0 ) * Hsub_T;
-                        // solution = K * ( meas_vec - Hsub * vec.block< 6, 1 >( 0, 0 ) );
-                        // double speed_delta = solution.block( 0, 6, 3, 1 ).norm();
-                        // if(solution.block( 0, 6, 3, 1 ).norm() > 0.05 )
-                        // {
-                        //     solution.block( 0, 6, 3, 1 ) = solution.block( 0, 6, 3, 1 ) / speed_delta * 0.05;
-                        // }
+                        
 
                         g_lio_state = state_propagate + solution;
                         // print_dash_board();
@@ -1062,11 +956,11 @@ int R3LIVE::service_LIO_update()
                         break;
                     }
                     solve_time += omp_get_wtime() - solve_start;
-                    // cout << "Match cost time: " << match_time * 1000.0
-                    //      << ", search cost time: " << kdtree_search_time*1000.0
-                    //      << ", PCA cost time: " << pca_time*1000.0
-                    //      << ", solver_cost: " << solve_time * 1000.0 << endl;
-                    // cout <<"Iter cost time: " << tim.toc("Iter") << endl;
+//                    cout << "Match cost time: " << match_time * 1000.0
+//                         << ", search cost time: " << kdtree_search_time*1000.0
+//                         << ", PCA cost time: " << pca_time*1000.0
+//                         << ", solver_cost: " << solve_time * 1000.0 << endl;
+//                    cout <<"Iter cost time: " << tim.toc("Iter") << endl;
                 }
 
                 t3 = omp_get_wtime();
@@ -1117,7 +1011,7 @@ int R3LIVE::service_LIO_update()
             *laserCloudFullRes2 = dense_map_en ? ( *feats_undistort ) : ( *feats_down );
 
             int laserCloudFullResNum = laserCloudFullRes2->points.size();
-            std::cout<<" lio : "<< std::endl << set_zero_matrix.block<6,6>(0,0) <<std::endl;
+//            std::cout<<" lio : "<< std::endl << set_zero_matrix.block<6,6>(0,0) <<std::endl;
             pcl::PointXYZI temp_point;
             laserCloudFullResColor->clear();
             {
@@ -1146,8 +1040,8 @@ int R3LIVE::service_LIO_update()
                     std::vector< std::shared_ptr< RGB_pts > > pts_last_hitted;
                     pts_last_hitted.reserve( 1e6 );
                     m_number_of_new_visited_voxel = m_map_rgb_pts.append_points_to_global_map(
-                        *laserCloudFullResColor, Measures.lidar_end_time - g_camera_lidar_queue.m_first_imu_time, &pts_last_hitted,
-                        m_append_global_map_point_step );
+                            *laserCloudFullResColor, Measures.lidar_end_time - g_camera_lidar_queue.m_first_imu_time, &pts_last_hitted,
+                            m_append_global_map_point_step );
                     m_map_rgb_pts.m_mutex_pts_last_visited->lock();
                     m_map_rgb_pts.m_pts_last_hitted = pts_last_hitted;
                     m_map_rgb_pts.m_mutex_pts_last_visited->unlock();
@@ -1155,8 +1049,8 @@ int R3LIVE::service_LIO_update()
                 else
                 {
                     m_number_of_new_visited_voxel = m_map_rgb_pts.append_points_to_global_map(
-                        *laserCloudFullResColor, Measures.lidar_end_time - g_camera_lidar_queue.m_first_imu_time, nullptr,
-                        m_append_global_map_point_step );
+                            *laserCloudFullResColor, Measures.lidar_end_time - g_camera_lidar_queue.m_first_imu_time, nullptr,
+                            m_append_global_map_point_step );
                 }
                 stastic_cost_time.push_back( tim.toc( " ", 0 ) );
             }

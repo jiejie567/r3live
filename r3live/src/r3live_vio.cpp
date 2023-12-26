@@ -1124,11 +1124,12 @@ void R3LIVE::service_VIO_update()
     op_track.m_maximum_vio_tracked_pts = m_maximum_vio_tracked_pts;
     m_map_rgb_pts.m_minimum_depth_for_projection = m_tracker_minimum_depth;
     m_map_rgb_pts.m_maximum_depth_for_projection = m_tracker_maximum_depth;
-    cv::imshow( "Control panel", generate_control_panel_img().clone() );
+    // cv::imshow( "Control panel", generate_control_panel_img().clone() );
     Common_tools::Timer tim;
     cv::Mat             img_get;
     while ( ros::ok() )
     {
+
         cv_keyboard_callback();
         while ( g_camera_lidar_queue.m_if_have_lidar_data == 0 )
         {
@@ -1161,7 +1162,7 @@ void R3LIVE::service_VIO_update()
         g_camera_lidar_queue.m_last_visual_time = img_pose->m_timestamp + g_lio_state.td_ext_i2c;
 
         img_pose->set_frame_idx( g_camera_frame_idx );
-        tim.tic( "Frame" );
+        // tim.tic( "Frame" );
 
         if ( g_camera_frame_idx == 0 )
         {
@@ -1181,6 +1182,7 @@ void R3LIVE::service_VIO_update()
         }
 
         g_camera_frame_idx++;
+
         tim.tic( "Wait" );
         while ( g_camera_lidar_queue.if_camera_can_process() == false )
         {
@@ -1230,7 +1232,7 @@ void R3LIVE::service_VIO_update()
         tim.tic( "Vio_f2m" );
         if(b_need_cam)  
         {
-            // res_photometric = vio_photometric( state_out, op_track, img_pose );
+            //  res_photometric = vio_photometric( state_out, op_track, img_pose );
         }
         g_cost_time_logger.record( tim, "Vio_f2m" );
         g_lio_state = state_out;
