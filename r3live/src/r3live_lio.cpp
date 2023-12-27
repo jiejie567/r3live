@@ -672,8 +672,15 @@ int R3LIVE::service_LIO_update()
                     laserCloudOri->clear();
                     coeffSel->clear();
 
+                    std::vector<int> index;
+                    for (int i = 0; i < feats_down_size; i += m_lio_update_point_step)
+                    {
+                        index.push_back(i);
+                    }
+
                     /** closest surface search and residual computation **/
-                    for ( int i = 0; i < feats_down_size; i += m_lio_update_point_step )
+                    // for ( int i = 0; i < feats_down_size; i += m_lio_update_point_step )
+                    std::for_each(std::execution::par_unseq, index.begin(), index.end(), [&] (int i)
                     {
                         double     search_start = omp_get_wtime();
                         PointType &pointOri_tmpt = feats_down->points[ i ];
@@ -703,84 +710,84 @@ int R3LIVE::service_LIO_update()
                         }
 
                         kdtree_search_time += omp_get_wtime() - search_start;
-                        if ( point_selected_surf[ i ] == false )
-                            continue;
-
-                        // match_time += omp_get_wtime() - match_start;
-                        double pca_start = omp_get_wtime();
-                        /// PCA (using minimum square method)
-                        cv::Mat matA0( NUM_MATCH_POINTS, 3, CV_32F, cv::Scalar::all( 0 ) );
-                        cv::Mat matB0( NUM_MATCH_POINTS, 1, CV_32F, cv::Scalar::all( -1 ) );
-                        cv::Mat matX0( NUM_MATCH_POINTS, 1, CV_32F, cv::Scalar::all( 0 ) );
-
-                        for ( int j = 0; j < NUM_MATCH_POINTS; j++ )
+                        if ( point_selected_surf[ i ] == true )
                         {
-                            matA0.at< float >( j, 0 ) = points_near[ j ].x;
-                            matA0.at< float >( j, 1 ) = points_near[ j ].y;
-                            matA0.at< float >( j, 2 ) = points_near[ j ].z;
-                        }
+                            // match_time += omp_get_wtime() - match_start;
+                            double pca_start = omp_get_wtime();
+                            /// PCA (using minimum square method)
+                            cv::Mat matA0( NUM_MATCH_POINTS, 3, CV_32F, cv::Scalar::all( 0 ) );
+                            cv::Mat matB0( NUM_MATCH_POINTS, 1, CV_32F, cv::Scalar::all( -1 ) );
+                            cv::Mat matX0( NUM_MATCH_POINTS, 1, CV_32F, cv::Scalar::all( 0 ) );
 
-                        cv::solve( matA0, matB0, matX0, cv::DECOMP_QR ); // TODO
-
-                        float pa = matX0.at< float >( 0, 0 );
-                        float pb = matX0.at< float >( 1, 0 );
-                        float pc = matX0.at< float >( 2, 0 );
-                        float pd = 1;
-
-                        float ps = sqrt( pa * pa + pb * pb + pc * pc );
-                        pa /= ps;
-                        pb /= ps;
-                        pc /= ps;
-                        pd /= ps;
-
-                        bool planeValid = true;
-                        for ( int j = 0; j < NUM_MATCH_POINTS; j++ )
-                        {
-                            // ANCHOR -  Planar check
-                            if ( fabs( pa * points_near[ j ].x + pb * points_near[ j ].y + pc * points_near[ j ].z + pd ) >
-                                 m_planar_check_dis ) // Raw 0.05
+                            for ( int j = 0; j < NUM_MATCH_POINTS; j++ )
                             {
-                                // ANCHOR - Far distance pt processing
-                                if ( ori_pt_dis < maximum_pt_range * 0.90 || ( ori_pt_dis < m_long_rang_pt_dis ) )
-                                // if(1)
+                                matA0.at< float >( j, 0 ) = points_near[ j ].x;
+                                matA0.at< float >( j, 1 ) = points_near[ j ].y;
+                                matA0.at< float >( j, 2 ) = points_near[ j ].z;
+                            }
+
+                            cv::solve( matA0, matB0, matX0, cv::DECOMP_QR ); // TODO
+
+                            float pa = matX0.at< float >( 0, 0 );
+                            float pb = matX0.at< float >( 1, 0 );
+                            float pc = matX0.at< float >( 2, 0 );
+                            float pd = 1;
+
+                            float ps = sqrt( pa * pa + pb * pb + pc * pc );
+                            pa /= ps;
+                            pb /= ps;
+                            pc /= ps;
+                            pd /= ps;
+
+                            bool planeValid = true;
+                            for ( int j = 0; j < NUM_MATCH_POINTS; j++ )
+                            {
+                                // ANCHOR -  Planar check
+                                if ( fabs( pa * points_near[ j ].x + pb * points_near[ j ].y + pc * points_near[ j ].z + pd ) >
+                                        m_planar_check_dis ) // Raw 0.05
                                 {
-                                    planeValid = false;
-                                    point_selected_surf[ i ] = false;
-                                    break;
+                                    // ANCHOR - Far distance pt processing
+                                    if ( ori_pt_dis < maximum_pt_range * 0.90 || ( ori_pt_dis < m_long_rang_pt_dis ) )
+                                    // if(1)
+                                    {
+                                        planeValid = false;
+                                        point_selected_surf[ i ] = false;
+                                        break;
+                                    }
                                 }
                             }
-                        }
 
-                        if ( planeValid )
-                        {
-                            float pd2 = pa * pointSel_tmpt.x + pb * pointSel_tmpt.y + pc * pointSel_tmpt.z + pd;
-                            float s = 1 - 0.9 * fabs( pd2 ) /
-                                              sqrt( sqrt( pointSel_tmpt.x * pointSel_tmpt.x + pointSel_tmpt.y * pointSel_tmpt.y +
-                                                          pointSel_tmpt.z * pointSel_tmpt.z ) );
-                            // ANCHOR -  Point to plane distance
-                            double acc_distance = ( ori_pt_dis < m_long_rang_pt_dis ) ? m_maximum_res_dis : 1.0;
-                            if ( pd2 < acc_distance )
+                            if ( planeValid )
                             {
-                                // if(std::abs(pd2) > 5 * res_mean_last)
-                                // {
-                                //     point_selected_surf[i] = false;
-                                //     res_last[i] = 0.0;
-                                //     continue;
-                                // }
-                                point_selected_surf[ i ] = true;
-                                coeffSel_tmpt->points[ i ].x = pa;
-                                coeffSel_tmpt->points[ i ].y = pb;
-                                coeffSel_tmpt->points[ i ].z = pc;
-                                coeffSel_tmpt->points[ i ].intensity = pd2;
-                                res_last[ i ] = std::abs( pd2 );
+                                float pd2 = pa * pointSel_tmpt.x + pb * pointSel_tmpt.y + pc * pointSel_tmpt.z + pd;
+                                float s = 1 - 0.9 * fabs( pd2 ) /
+                                                    sqrt( sqrt( pointSel_tmpt.x * pointSel_tmpt.x + pointSel_tmpt.y * pointSel_tmpt.y +
+                                                                pointSel_tmpt.z * pointSel_tmpt.z ) );
+                                // ANCHOR -  Point to plane distance
+                                double acc_distance = ( ori_pt_dis < m_long_rang_pt_dis ) ? m_maximum_res_dis : 1.0;
+                                if ( pd2 < acc_distance )
+                                {
+                                    // if(std::abs(pd2) > 5 * res_mean_last)
+                                    // {
+                                    //     point_selected_surf[i] = false;
+                                    //     res_last[i] = 0.0;
+                                    //     continue;
+                                    // }
+                                    point_selected_surf[ i ] = true;
+                                    coeffSel_tmpt->points[ i ].x = pa;
+                                    coeffSel_tmpt->points[ i ].y = pb;
+                                    coeffSel_tmpt->points[ i ].z = pc;
+                                    coeffSel_tmpt->points[ i ].intensity = pd2;
+                                    res_last[ i ] = std::abs( pd2 );
+                                }
+                                else
+                                {
+                                    point_selected_surf[ i ] = false;
+                                }
                             }
-                            else
-                            {
-                                point_selected_surf[ i ] = false;
-                            }
+                            pca_time += omp_get_wtime() - pca_start;
                         }
-                        pca_time += omp_get_wtime() - pca_start;
-                    }
+                    });
                     tim.tic( "Stack" );
                     double total_residual = 0.0;
                     laserCloudSelNum = 0;
@@ -805,7 +812,13 @@ int R3LIVE::service_LIO_update()
                     Eigen::VectorXd meas_vec( laserCloudSelNum );
                     Hsub.setZero();
 
-                    for ( int i = 0; i < laserCloudSelNum; i++ )
+                    std::vector<int> index_laserCloudSelNum;
+                    for (int i = 0; i < laserCloudSelNum; i++)
+                    {
+                        index_laserCloudSelNum.push_back(i);
+                    }
+                    // for ( int i = 0; i < laserCloudSelNum; i++ )
+                    std::for_each(std::execution::par_unseq, index_laserCloudSelNum.begin(), index_laserCloudSelNum.end(), [&] (int i)
                     {
                         const PointType &laser_p = laserCloudOri->points[ i ];
                         Eigen::Vector3d  point_this( laser_p.x, laser_p.y, laser_p.z );
@@ -823,7 +836,7 @@ int R3LIVE::service_LIO_update()
 
                         /*** Measuremnt: distance to the closest surface/corner ***/
                         meas_vec( i ) = -norm_p.intensity;
-                    }
+                    });
 
                     Eigen::Vector3d                           rot_add, t_add, v_add, bg_add, ba_add, g_add;
                     Eigen::Matrix< double, DIM_OF_STATES, 1 > solution;

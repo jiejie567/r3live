@@ -3,7 +3,7 @@ Lidar_front_end:
    lidar_topic: /front/points2_in_front
    lidar_type: 4   # 1 for Livox-avia, 3 for Ouster-OS1-64, 4 for Azure Kinect DK
    N_SCANS: 6
-   using_raw_point: 8
+   using_raw_point: 1
    point_filter_num: 1
    
 r3live_common:
