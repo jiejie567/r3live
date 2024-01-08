@@ -241,7 +241,6 @@ void Rgbmap_tracker::track_img( std::shared_ptr< Image_frame > &img_pose, double
     tim.tic( "HE" );
     tim.tic( "opTrack" );
     std::vector< uchar > status;
-    std::vector< float > err;
     m_current_tracked_pts = m_last_tracked_pts;
     int before_track = m_last_tracked_pts.size();
     if ( m_last_tracked_pts.size() < 30 )
@@ -257,9 +256,9 @@ void Rgbmap_tracker::track_img( std::shared_ptr< Image_frame > &img_pose, double
 
     int     after_track = m_last_tracked_pts.size();
     cv::Mat mat_F;
-
     tim.tic( "Reject_F" );
     unsigned int pts_before_F = m_last_tracked_pts.size();
+    std::cout<< "after_track "<< after_track <<std::endl;
     mat_F = cv::findFundamentalMat( m_last_tracked_pts, m_current_tracked_pts, cv::FM_RANSAC, 1.0, 0.997, status );
     unsigned int size_a = m_current_tracked_pts.size();
     reduce_vector( m_last_tracked_pts, status );
@@ -342,7 +341,7 @@ int Rgbmap_tracker::remove_outlier_using_ransac_pnp( std::shared_ptr< Image_fram
         std::vector< int > status;
         try
         {
-            cv::solvePnPRansac( pt_3d_vec, pt_2d_vec, m_intrinsic, cv::Mat(), r_vec, t_vec, false, 200, 1.5, 0.99,
+            cv::solvePnPRansac( pt_3d_vec, pt_2d_vec, m_intrinsic, cv::Mat(), r_vec, t_vec, false, 200, 4, 0.99,
                                 status ); // SOLVEPNP_ITERATIVE
         }
         catch ( cv::Exception &e )

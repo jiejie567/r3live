@@ -22,7 +22,7 @@
 #include "lib_sophus/se3.hpp"
 #include "lib_sophus/so3.hpp"
 // #define DEBUG_PRINT
-#define USE_ikdtree
+#define USE_ikdtree 1
 #define ESTIMATE_GRAVITY  1
 #define ENABLE_CAMERA_OBS 1
 // #define USE_FOV_Checker
@@ -209,7 +209,7 @@ struct Camera_Lidar_queue
     {
         if (m_liar_frame_buf != nullptr && m_liar_frame_buf->size())
         {
-            m_last_lidar_time = m_liar_frame_buf->front()->header.stamp.toSec() + 0.1;
+            m_last_lidar_time = m_liar_frame_buf->front()->header.stamp.toSec() +0.005;
             return m_last_lidar_time;
         }
         else

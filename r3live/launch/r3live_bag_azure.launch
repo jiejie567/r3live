@@ -19,7 +19,7 @@
         <node name="rvizvisualisation" pkg="rviz" type="rviz" output="log" args="-d $(find r3live)/../config/rviz/r3live_rviz_config_ouster.rviz" />
     </group>
 
-    <arg name="bag_name" value="/home/jeff/Downloads/室外.bag"/>
-	<node pkg="rosbag" type="play" name="rosbag" args=" -r 2.0 -s 0.0 $(arg bag_name) --clock"/>
+    <arg name="bag_name" value="/home/jeff/Downloads/室内.bag"/>
+	<node pkg="rosbag" type="play" name="rosbag" args=" -r 1 -s 0.0 $(arg bag_name) --clock"/>
 
  </launch>

@@ -22,22 +22,28 @@ r3live_vio:
    # image_height: 720
    image_width: 640
    image_height: 360
+   # image_width: 320
+   # image_height: 180
    # camera_intrinsic:
-   #    [607.778, 0.0, 636.636,
-   #    0.0,  607.751, 368.102,
+   #    [606.007, 0.0, 637.176,
+   #    0.0,  605.861, 364.609,
    #    0.0, 0.0, 1.0 ] 
    camera_intrinsic:
-      [303.85, 0.0, 318.318,
-      0.0,  303.85, 184.51,
+      [303.0035, 0.0, 318.59,
+      0.0,  302.9305, 182.305,
       0.0, 0.0, 1.0 ] 
-   camera_dist_coeffs: [0.527894, -2.78783, 0.000106269, 2.59275e-05, 1.66303]  #k1, k2, p1, p2, k3
+   # camera_intrinsic:
+   #    [151.50175, 0.0, 159.294,
+   #    0.0,  151.46525, 91.15225,
+   #    0.0, 0.0, 1.0 ] 
+   camera_dist_coeffs: [0.443742, -2.66157, 0.000198191, -0.000102139, 1.60547]  #k1, k2, p1, p2, k3
    # Fine extrinsic value. form camera-LiDAR calibration.
    camera_ext_R: #actually , camera imu 
-         [-0.00061492, 0.00730016, -0.999973,
-            -0.999996, -0.00270155, 0.000595212,
-            -0.00269713, 0.99997, 0.00730179]
+         [0.00359429, 0.00610373, -0.999975,
+            -0.999994, -0.000156368, -0.00359531,
+            -0.000178309, 0.999981, 0.00610314]
    # camera_ext_t: [0.050166, 0.0474116, -0.0312415] 
-   camera_ext_t: [-0.046, -0.028, 0.003] 
+   camera_ext_t: [-0.04669, -0.02897, 0.002746] 
    # camera_ext_t: [-0.028, -0.003, -0.046] 
 
    # Rough extrinsic value, form CAD model, is not correct enough, but can be online calibrated in our datasets.
@@ -62,3 +68,5 @@ r3live_lio:
          #    -0.99409, -0.00256003, 0.10853]
    # camera_ext_t: [0.050166, 0.0474116, -0.0312415] 
    lidar_ext_t_il: [-0.051, 0.003, 0.001] 
+   cube_side_length: 2000
+   publish_feature_map: false

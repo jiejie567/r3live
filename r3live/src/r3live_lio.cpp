@@ -167,7 +167,7 @@ bool R3LIVE::sync_packages( MeasureGroup &meas )
         meas.lidar_beg_time = lidar_buffer.front()->header.stamp.toSec();
         if(meas.lidar->points.back().curvature == 0.0) //for ToFRGBD
         {
-            lidar_end_time = meas.lidar_beg_time;
+            lidar_end_time = lidar_buffer.front()->header.stamp.toSec();
         }
         else
         {
@@ -195,7 +195,6 @@ bool R3LIVE::sync_packages( MeasureGroup &meas )
         meas.imu.push_back( imu_buffer_lio.front() );
         imu_buffer_lio.pop_front();
     }
-
     lidar_buffer.pop_front();
     lidar_pushed = false;
     // if (meas.imu.empty()) return false;
@@ -534,6 +533,7 @@ int R3LIVE::service_LIO_update()
     bool      status = ros::ok();
     g_camera_lidar_queue.m_liar_frame_buf = &lidar_buffer;
     set_initial_state_cov( g_lio_state );
+    int lidar_count = 0;
     while ( ros::ok() )
     {
         if ( flg_exit )
@@ -616,6 +616,7 @@ int R3LIVE::service_LIO_update()
                 ikdtree.set_downsample_param( filter_size_map_min );
                 ikdtree.Build( feats_down->points );
                 flg_map_initialized = true;
+                lidar_count++;
                 continue;
             }
 
@@ -873,7 +874,6 @@ int R3LIVE::service_LIO_update()
                         double minEigenvalue_trans = solver_trans.eigenvalues().real().minCoeff();
 
                         b_need_cam = false;
-                        // b_need_cam = true;
                         set_zero_matrix.setZero();
                         // set_zero_matrix.block<6,6>(0,0).setIdentity();
                         // b_need_cam = true;
@@ -967,7 +967,8 @@ int R3LIVE::service_LIO_update()
                 }
 
                 t3 = omp_get_wtime();
-
+                ROS_INFO("No. %d lidar set update_time %0.6f", lidar_count, Measures.lidar_end_time);
+                lidar_count++;
                 /*** add new frame points to map ikdtree ***/
                 PointVector points_history;
                 ikdtree.acquire_removed_points( points_history );
@@ -1010,7 +1011,7 @@ int R3LIVE::service_LIO_update()
             }
 
             /******* Publish current frame points in world coordinates:  *******/
-            std::cout<<" lio : "<< std::endl << set_zero_matrix.block<6,6>(0,0) <<std::endl;
+            // std::cout<<" lio : "<< std::endl << set_zero_matrix.block<6,6>(0,0) <<std::endl;
             laserCloudFullRes2->clear();
             *laserCloudFullRes2 = dense_map_en ? ( *feats_undistort ) : ( *feats_down );
 

@@ -560,6 +560,7 @@ void R3LIVE::publish_track_pts( Rgbmap_tracker &tracker )
 // ANCHOR - VIO preintegration
 bool R3LIVE::vio_preintegration( StatesGroup &state_in, StatesGroup &state_out, double current_frame_time )
 {
+    static int count = 1;
     state_out = state_in;
     if ( current_frame_time <= state_in.last_update_time )
     {
@@ -567,6 +568,9 @@ bool R3LIVE::vio_preintegration( StatesGroup &state_in, StatesGroup &state_out, 
         // current_frame_time - state_in.last_update_time << ANSI_COLOR_RESET << endl;
         return false;
     }
+    ROS_INFO("No. %d camera current frame time = %0.6f, last update time = %0.6f", count, current_frame_time, state_in.last_update_time);
+    count++;
+    std::cout<<"cureent frame - last update time = " << current_frame_time-state_in.last_update_time <<std::endl;
     mtx_buffer.lock();
     std::deque< sensor_msgs::Imu::ConstPtr > vio_imu_queue;
     for ( auto it = imu_buffer_vio.begin(); it != imu_buffer_vio.end(); it++ )
@@ -1184,6 +1188,14 @@ void R3LIVE::service_VIO_update()
             continue;
         }
 
+        // if(b_need_cam)
+        // {
+        //     std::vector< cv::Point2f >                pts_2d_vec;
+        //     std::vector< std::shared_ptr< RGB_pts > > rgb_pts_vec;
+        //     m_map_rgb_pts.selection_points_for_projection( g_last_image_pose_for_render, &rgb_pts_vec, &pts_2d_vec, m_track_windows_size / m_vio_scale_factor );
+        //     ROS_INFO("pts_2d_vec.size() = %zu ", pts_2d_vec.size());
+        //     op_track.init( g_last_image_pose_for_render, rgb_pts_vec, pts_2d_vec );
+        // }
         g_camera_frame_idx++;
         tim.tic( "Wait" );
         while ( g_camera_lidar_queue.if_camera_can_process() == false )
@@ -1212,7 +1224,6 @@ void R3LIVE::service_VIO_update()
         g_cost_time_logger.record( tim, "Track_img" );
         // cout << "Track_img cost " << tim.toc( "Track_img" ) << endl;
         tim.tic( "Ransac" );
-        set_image_pose( img_pose, state_out );
         if(b_need_cam)
         {
             // ANCHOR -  remove point using PnP.
@@ -1240,7 +1251,6 @@ void R3LIVE::service_VIO_update()
         g_lio_state = state_out;
         // print_dash_board();
         set_image_pose( img_pose, state_out );
-
         if ( 1 )
         {
             tim.tic( "Render" );
@@ -1279,6 +1289,7 @@ void R3LIVE::service_VIO_update()
         g_cost_time_logger.record( tim, "Frame" );
         double frame_cost = tim.toc( "Frame" );
         g_image_vec.push_back( img_pose );
+        g_last_image_pose_for_render = img_pose;
         frame_cost_time_vec.push_back( frame_cost );
         if ( g_image_vec.size() > 10 )
         {

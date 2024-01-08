@@ -182,6 +182,7 @@ StatesGroup ImuProcess::imu_preintegration( const StatesGroup &state_in, std::de
     //        v_imu.back()->header.stamp.toSec() - g_lidar_star_tim,
     //        state_in.last_update_time - g_lidar_star_tim,
     //        state_in.last_update_time - v_imu.front()->header.stamp.toSec());
+    int cnt_imu = 0;
     for ( std::deque< sensor_msgs::Imu::ConstPtr >::iterator it_imu = v_imu.begin(); it_imu != ( v_imu.end() - 1 ); it_imu++ )
     {
         // if(g_lidar_star_tim == 0 || state_inout.last_update_time == 0)
@@ -199,12 +200,11 @@ StatesGroup ImuProcess::imu_preintegration( const StatesGroup &state_in, std::de
         angvel_avr -= state_inout.bias_g;
 
         acc_avr = acc_avr - state_inout.bias_a;
-
         if ( tail->header.stamp.toSec() < state_inout.last_update_time )
         {
             continue;
         }
-
+        cnt_imu++;
         if ( if_first_imu )
         {
             if_first_imu = 0;
@@ -269,6 +269,7 @@ StatesGroup ImuProcess::imu_preintegration( const StatesGroup &state_in, std::de
         //       << endl;
         // cout << "Acc_avr: " << acc_avr.transpose() << endl;
     }
+    ROS_INFO("last_update_time in imu_preintegration is %0.6f, imu size = %zu", state_inout.last_update_time, cnt_imu);
 
     // cout <<__FILE__ << ", " << __LINE__ <<" ,diagnose lio_state = " << std::setprecision(2) <<(state_inout - StatesGroup()).transpose() << endl;
     /*** calculated the pos and attitude prediction at the frame-end ***/

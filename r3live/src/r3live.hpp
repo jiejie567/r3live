@@ -149,7 +149,7 @@ public:
     int laserCloudCenWidth = 24;
     int laserCloudCenHeight = 24;
     int laserCloudCenDepth = 24;
-
+    double last_lidar_time= 0;
     int laserCloudValidNum = 0;
     int laserCloudSelNum = 0;
 
