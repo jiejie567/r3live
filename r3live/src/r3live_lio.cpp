@@ -875,6 +875,8 @@ int R3LIVE::service_LIO_update()
 
                         b_need_cam = false;
                         set_zero_matrix.setZero();
+                        // b_need_cam = true;
+                        // set_zero_matrix.setIdentity();
                         // set_zero_matrix.block<6,6>(0,0).setIdentity();
                         // b_need_cam = true;
                         eigenRotation.setIdentity();
@@ -943,7 +945,7 @@ int R3LIVE::service_LIO_update()
 
                     /*** Convergence Judgements and Covariance Update ***/
                     // if (rematch_num >= 10 || (iterCount == NUM_MAX_ITERATIONS - 1))
-                    if ( rematch_num >= 2 || ( iterCount == NUM_MAX_ITERATIONS - 1 ) ) // Fast lio ori version.
+                    if ( rematch_num >= 5 || ( iterCount == NUM_MAX_ITERATIONS - 1 ) ) // Fast lio ori version.
                     {
                         if ( flg_EKF_inited )
                         {

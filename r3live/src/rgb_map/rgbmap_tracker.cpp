@@ -248,6 +248,7 @@ void Rgbmap_tracker::track_img( std::shared_ptr< Image_frame > &img_pose, double
         m_last_frame_time = m_current_frame_time;
         return;
     }
+    std::cout<< "before_track "<< m_last_tracked_pts.size() <<std::endl;
 
     m_lk_optical_flow_kernel->track_image( frame_gray, m_last_tracked_pts, m_current_tracked_pts, status, 2 );
     reduce_vector( m_last_tracked_pts, status );
@@ -341,7 +342,7 @@ int Rgbmap_tracker::remove_outlier_using_ransac_pnp( std::shared_ptr< Image_fram
         std::vector< int > status;
         try
         {
-            cv::solvePnPRansac( pt_3d_vec, pt_2d_vec, m_intrinsic, cv::Mat(), r_vec, t_vec, false, 200, 4, 0.99,
+            cv::solvePnPRansac( pt_3d_vec, pt_2d_vec, m_intrinsic, cv::Mat(), r_vec, t_vec, false, 200, 8, 0.99,
                                 status ); // SOLVEPNP_ITERATIVE
         }
         catch ( cv::Exception &e )

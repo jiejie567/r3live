@@ -1,6 +1,6 @@
 <launch>
-    <node pkg="tf" type="static_transform_publisher" name="word2camera"  args="0 0 0 0 3.14 0 /world /camera_init 100" />
-    <param name="/use_sim_time" value="true" />
+    <!-- <node pkg="tf" type="static_transform_publisher" name="word2camera"  args="0 0 0 0 3.14 0 /world /camera_init 100" />
+    <param name="/use_sim_time" value="true" /> -->
 
     <!-- Subscribed topics -->
     <param name="/LiDAR_pointcloud_topic" type="string" value= "/laser_cloud_flat" />
@@ -19,7 +19,17 @@
         <node name="rvizvisualisation" pkg="rviz" type="rviz" output="log" args="-d $(find r3live)/../config/rviz/r3live_rviz_config_ouster.rviz" />
     </group>
 
-    <arg name="bag_name" value="/home/jeff/Downloads/室内.bag"/>
-	<node pkg="rosbag" type="play" name="rosbag" args=" -r 1 -s 0.0 $(arg bag_name) --clock"/>
+    <!-- <arg name="bag_name" value="/home/jeff/Downloads/dataset/3rgbd/数据集/一楼厂房1.bag"/> -->
+    <!-- <arg name="bag_name" value="/home/jeff/Downloads/dataset/3rgbd/数据集/一楼厂房2.bag"/> -->
+    <!-- <arg name="bag_name" value="/home/jeff/Downloads/dataset/3rgbd/数据集/一楼进门口.bag"/> -->
+    <!-- <arg name="bag_name" value="/home/jeff/Downloads/dataset/3rgbd/数据集/室内.bag"/> -->
+    <!-- <arg name="bag_name" value="/home/jeff/Downloads/dataset/3rgbd/数据集/室内+室.bag"/> -->
+    <arg name="bag_name" value="/home/jeff/Downloads/dataset/3rgbd/数据集/2222.bag"/>
+    <!-- <arg name="bag_name" value="/home/jeff/Downloads/dataset/3rgbd/室内.bag"/> -->
+    <!-- <arg name="bag_name" value="/home/jeff/Downloads/dataset/3rgbd/室外.bag"/> -->
+    <!-- <arg name="bag_name" value="/home/jeff/Downloads/dataset/3rgbd/640_360.bag"/> -->
+    <!-- <arg name="bag_name" value="/home/jeff/Downloads/dataset/3rgbd/320_180.bag"/> -->
+
+	<node pkg="rosbag" type="play" name="rosbag" args=" -r 3 -s 0.0 $(arg bag_name) "/>
 
  </launch>

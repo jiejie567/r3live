@@ -177,9 +177,9 @@ struct Global_map
     std::unordered_set< std::shared_ptr< RGB_Voxel > > m_voxels_recent_visited;
     std::vector< std::shared_ptr< RGB_pts > >          m_pts_last_hitted;
     double                                   m_minimum_pts_size = 0.05; // 5cm minimum distance.
-    double                                   m_voxel_resolution = 0.1;
+    double                                   m_voxel_resolution = 0.005;
     double                                   m_maximum_depth_for_projection = 200;
-    double                                   m_minimum_depth_for_projection = 3;
+    double                                   m_minimum_depth_for_projection = 0.2;
     int                                      m_last_updated_frame_idx = -1;
     void                                     clear();
     void set_minmum_dis( double minimum_dis );
