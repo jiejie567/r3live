@@ -16,20 +16,26 @@
     
     <arg name="rviz" default="1" />
     <group if="$(arg rviz)">
-        <node name="rvizvisualisation" pkg="rviz" type="rviz" output="log" args="-d $(find r3live)/../config/rviz/r3live_rviz_config_ouster.rviz" />
+        <node name="rvizvisualisation" pkg="rviz" type="rviz" output="log" args="-d $(find r3live)/../config/rviz/r3live_rviz_config.rviz" />
     </group>
 
-    <!-- <arg name="bag_name" value="/home/jeff/Downloads/dataset/3rgbd/数据集/一楼厂房1.bag"/> -->
+    <arg name="bag_name" value="/home/jeff/Downloads/dataset/3rgbd/数据集/一楼厂房1.bag"/>
     <!-- <arg name="bag_name" value="/home/jeff/Downloads/dataset/3rgbd/数据集/一楼厂房2.bag"/> -->
     <!-- <arg name="bag_name" value="/home/jeff/Downloads/dataset/3rgbd/数据集/一楼进门口.bag"/> -->
     <!-- <arg name="bag_name" value="/home/jeff/Downloads/dataset/3rgbd/数据集/室内.bag"/> -->
     <!-- <arg name="bag_name" value="/home/jeff/Downloads/dataset/3rgbd/数据集/室内+室.bag"/> -->
-    <arg name="bag_name" value="/home/jeff/Downloads/dataset/3rgbd/数据集/2222.bag"/>
+    <!-- <arg name="bag_name" value="/home/jeff/Downloads/dataset/3rgbd/数据集/2222.bag"/> -->
     <!-- <arg name="bag_name" value="/home/jeff/Downloads/dataset/3rgbd/室内.bag"/> -->
     <!-- <arg name="bag_name" value="/home/jeff/Downloads/dataset/3rgbd/室外.bag"/> -->
     <!-- <arg name="bag_name" value="/home/jeff/Downloads/dataset/3rgbd/640_360.bag"/> -->
     <!-- <arg name="bag_name" value="/home/jeff/Downloads/dataset/3rgbd/320_180.bag"/> -->
+    <!-- <arg name="bag_name" value="/home/jeff/Downloads/dataset/3rgbd/1.19/室内.bag"/> -->
+    <!-- <arg name="bag_name" value="/home/jeff/Downloads/dataset/3rgbd/1.19/室内+会议室.bag"/> -->
+    <!-- <arg name="bag_name" value="/home/jeff/Downloads/dataset/3rgbd/1.19/室内+室外.bag"/> -->
+    <!-- <arg name="bag_name" value="/home/jeff/Downloads/dataset/3rgbd/1.19/室内+菜园.bag"/> -->
+    <!-- <arg name="bag_name" value="/home/jeff/Downloads/dataset/3rgbd/1.19/教室.bag"/> -->
 
-	<node pkg="rosbag" type="play" name="rosbag" args=" -r 3 -s 0.0 $(arg bag_name) "/>
+    <node name="path_listener_node" pkg="path_listener" type="path_listener" output="screen"/>
+    <node name="sleep_then_rosbag" pkg="rosbag" type="play" args="-r 2 -s 0.0 $(arg bag_name)" launch-prefix="bash -c 'sleep 3; $0 $@'"/>
 
  </launch>

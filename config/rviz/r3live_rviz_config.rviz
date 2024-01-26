@@ -15,11 +15,10 @@ Panels:
         - /RGB_map1/PointCloud22
         - /RGB_map1/PointCloud23
       Splitter Ratio: 0.4651159942150116
-    Tree Height: 902
+    Tree Height: 1040
   - Class: rviz/Selection
     Name: Selection
   - Class: rviz/Time
-    Experimental: false
     Name: Time
     SyncMode: 0
     SyncSource: feature_map
@@ -40,7 +39,7 @@ Panels:
         - /RGB_map1/PointCloud22
         - /RGB_map1/PointCloud260
       Splitter Ratio: 0.5
-    Tree Height: 303
+    Tree Height: 296
   - Class: rviz/Views
     Expanded:
       - /Current View1
@@ -72,12 +71,14 @@ Visualization Manager:
       Plane Cell Count: 1000
       Reference Frame: <Fixed Frame>
       Value: false
-    - Class: rviz/Axes
+    - Alpha: 1
+      Class: rviz/Axes
       Enabled: false
       Length: 1
       Name: Axes
       Radius: 0.10000000149011612
       Reference Frame: <Fixed Frame>
+      Show Trail: false
       Value: false
     - Class: rviz/Group
       Displays:
@@ -157,7 +158,7 @@ Visualization Manager:
           Position Transformer: XYZ
           Queue Size: 10
           Selectable: true
-          Size (Pixels): 5
+          Size (Pixels): 3
           Size (m): 1
           Style: Points
           Topic: /cloud_registered
@@ -210,6 +211,7 @@ Visualization Manager:
             Z: 0
           Pose Color: 255; 85; 255
           Pose Style: None
+          Queue Size: 10
           Radius: 0.029999999329447746
           Shaft Diameter: 0.10000000149011612
           Shaft Length: 0.10000000149011612
@@ -237,6 +239,7 @@ Visualization Manager:
           Keep: 1
           Name: Odometry
           Position Tolerance: 0.009999999776482582
+          Queue Size: 10
           Shape:
             Alpha: 1
             Axes Length: 0.20000000298023224
@@ -271,6 +274,7 @@ Visualization Manager:
           Keep: 1
           Name: Odometry
           Position Tolerance: 0.0010000000474974513
+          Queue Size: 10
           Shape:
             Alpha: 1
             Axes Length: 1
@@ -307,6 +311,7 @@ Visualization Manager:
       Keep: 1
       Name: Odometry
       Position Tolerance: 0.10000000149011612
+      Queue Size: 10
       Shape:
         Alpha: 1
         Axes Length: 0.5
@@ -337,6 +342,7 @@ Visualization Manager:
         Z: 0
       Pose Color: 255; 85; 255
       Pose Style: None
+      Queue Size: 10
       Radius: 0.029999999329447746
       Shaft Diameter: 0.10000000149011612
       Shaft Length: 0.10000000149011612
@@ -401,7 +407,7 @@ Visualization Manager:
           Use Fixed Frame: true
           Use rainbow: true
           Value: true
-        - Alpha: 1
+        - Alpha: 0.5
           Autocompute Intensity Bounds: true
           Autocompute Value Bounds:
             Max Value: 203.29579162597656
@@ -429,7 +435,7 @@ Visualization Manager:
           Use Fixed Frame: true
           Use rainbow: true
           Value: true
-        - Alpha: 1
+        - Alpha: 0.5
           Autocompute Intensity Bounds: true
           Autocompute Value Bounds:
             Max Value: 203.29579162597656
@@ -457,7 +463,7 @@ Visualization Manager:
           Use Fixed Frame: true
           Use rainbow: true
           Value: true
-        - Alpha: 1
+        - Alpha: 0.5
           Autocompute Intensity Bounds: true
           Autocompute Value Bounds:
             Max Value: 203.29579162597656
@@ -485,7 +491,7 @@ Visualization Manager:
           Use Fixed Frame: true
           Use rainbow: true
           Value: true
-        - Alpha: 1
+        - Alpha: 0.5
           Autocompute Intensity Bounds: true
           Autocompute Value Bounds:
             Max Value: 203.29579162597656
@@ -513,7 +519,7 @@ Visualization Manager:
           Use Fixed Frame: true
           Use rainbow: true
           Value: true
-        - Alpha: 1
+        - Alpha: 0.5
           Autocompute Intensity Bounds: true
           Autocompute Value Bounds:
             Max Value: 203.29579162597656
@@ -541,7 +547,7 @@ Visualization Manager:
           Use Fixed Frame: true
           Use rainbow: true
           Value: true
-        - Alpha: 1
+        - Alpha: 0.5
           Autocompute Intensity Bounds: true
           Autocompute Value Bounds:
             Max Value: 203.29579162597656
@@ -569,7 +575,7 @@ Visualization Manager:
           Use Fixed Frame: true
           Use rainbow: true
           Value: true
-        - Alpha: 1
+        - Alpha: 0.5
           Autocompute Intensity Bounds: true
           Autocompute Value Bounds:
             Max Value: 203.29579162597656
@@ -597,7 +603,7 @@ Visualization Manager:
           Use Fixed Frame: true
           Use rainbow: true
           Value: true
-        - Alpha: 1
+        - Alpha: 0.5
           Autocompute Intensity Bounds: true
           Autocompute Value Bounds:
             Max Value: 203.29579162597656
@@ -625,7 +631,7 @@ Visualization Manager:
           Use Fixed Frame: true
           Use rainbow: true
           Value: true
-        - Alpha: 1
+        - Alpha: 0.5
           Autocompute Intensity Bounds: true
           Autocompute Value Bounds:
             Max Value: 203.29579162597656
@@ -653,7 +659,7 @@ Visualization Manager:
           Use Fixed Frame: true
           Use rainbow: true
           Value: true
-        - Alpha: 1
+        - Alpha: 0.5
           Autocompute Intensity Bounds: true
           Autocompute Value Bounds:
             Max Value: 203.29579162597656
@@ -681,7 +687,7 @@ Visualization Manager:
           Use Fixed Frame: true
           Use rainbow: true
           Value: true
-        - Alpha: 1
+        - Alpha: 0.5
           Autocompute Intensity Bounds: true
           Autocompute Value Bounds:
             Max Value: 203.29579162597656
@@ -709,7 +715,7 @@ Visualization Manager:
           Use Fixed Frame: true
           Use rainbow: true
           Value: true
-        - Alpha: 1
+        - Alpha: 0.5
           Autocompute Intensity Bounds: true
           Autocompute Value Bounds:
             Max Value: 203.29579162597656
@@ -737,7 +743,7 @@ Visualization Manager:
           Use Fixed Frame: true
           Use rainbow: true
           Value: true
-        - Alpha: 1
+        - Alpha: 0.5
           Autocompute Intensity Bounds: true
           Autocompute Value Bounds:
             Max Value: 203.29579162597656
@@ -765,7 +771,7 @@ Visualization Manager:
           Use Fixed Frame: true
           Use rainbow: true
           Value: true
-        - Alpha: 1
+        - Alpha: 0.5
           Autocompute Intensity Bounds: true
           Autocompute Value Bounds:
             Max Value: 203.29579162597656
@@ -793,7 +799,7 @@ Visualization Manager:
           Use Fixed Frame: true
           Use rainbow: true
           Value: true
-        - Alpha: 1
+        - Alpha: 0.5
           Autocompute Intensity Bounds: true
           Autocompute Value Bounds:
             Max Value: 203.29579162597656
@@ -821,7 +827,7 @@ Visualization Manager:
           Use Fixed Frame: true
           Use rainbow: true
           Value: true
-        - Alpha: 1
+        - Alpha: 0.5
           Autocompute Intensity Bounds: true
           Autocompute Value Bounds:
             Max Value: 203.29579162597656
@@ -849,7 +855,7 @@ Visualization Manager:
           Use Fixed Frame: true
           Use rainbow: true
           Value: true
-        - Alpha: 1
+        - Alpha: 0.5
           Autocompute Intensity Bounds: true
           Autocompute Value Bounds:
             Max Value: 203.29579162597656
@@ -877,7 +883,7 @@ Visualization Manager:
           Use Fixed Frame: true
           Use rainbow: true
           Value: true
-        - Alpha: 1
+        - Alpha: 0.5
           Autocompute Intensity Bounds: true
           Autocompute Value Bounds:
             Max Value: 203.29579162597656
@@ -905,7 +911,7 @@ Visualization Manager:
           Use Fixed Frame: true
           Use rainbow: true
           Value: true
-        - Alpha: 1
+        - Alpha: 0.5
           Autocompute Intensity Bounds: true
           Autocompute Value Bounds:
             Max Value: 203.29579162597656
@@ -933,7 +939,7 @@ Visualization Manager:
           Use Fixed Frame: true
           Use rainbow: true
           Value: true
-        - Alpha: 1
+        - Alpha: 0.5
           Autocompute Intensity Bounds: true
           Autocompute Value Bounds:
             Max Value: 203.29579162597656
@@ -961,7 +967,7 @@ Visualization Manager:
           Use Fixed Frame: true
           Use rainbow: true
           Value: true
-        - Alpha: 1
+        - Alpha: 0.5
           Autocompute Intensity Bounds: true
           Autocompute Value Bounds:
             Max Value: 203.29579162597656
@@ -989,7 +995,7 @@ Visualization Manager:
           Use Fixed Frame: true
           Use rainbow: true
           Value: true
-        - Alpha: 1
+        - Alpha: 0.5
           Autocompute Intensity Bounds: true
           Autocompute Value Bounds:
             Max Value: 203.29579162597656
@@ -1017,7 +1023,7 @@ Visualization Manager:
           Use Fixed Frame: true
           Use rainbow: true
           Value: true
-        - Alpha: 1
+        - Alpha: 0.5
           Autocompute Intensity Bounds: true
           Autocompute Value Bounds:
             Max Value: 203.29579162597656
@@ -1045,7 +1051,7 @@ Visualization Manager:
           Use Fixed Frame: true
           Use rainbow: true
           Value: true
-        - Alpha: 1
+        - Alpha: 0.5
           Autocompute Intensity Bounds: true
           Autocompute Value Bounds:
             Max Value: 203.29579162597656
@@ -1073,7 +1079,7 @@ Visualization Manager:
           Use Fixed Frame: true
           Use rainbow: true
           Value: true
-        - Alpha: 1
+        - Alpha: 0.5
           Autocompute Intensity Bounds: true
           Autocompute Value Bounds:
             Max Value: 203.29579162597656
@@ -1101,7 +1107,7 @@ Visualization Manager:
           Use Fixed Frame: true
           Use rainbow: true
           Value: true
-        - Alpha: 1
+        - Alpha: 0.5
           Autocompute Intensity Bounds: true
           Autocompute Value Bounds:
             Max Value: 203.29579162597656
@@ -1129,7 +1135,7 @@ Visualization Manager:
           Use Fixed Frame: true
           Use rainbow: true
           Value: true
-        - Alpha: 1
+        - Alpha: 0.5
           Autocompute Intensity Bounds: true
           Autocompute Value Bounds:
             Max Value: 203.29579162597656
@@ -1157,7 +1163,7 @@ Visualization Manager:
           Use Fixed Frame: true
           Use rainbow: true
           Value: true
-        - Alpha: 1
+        - Alpha: 0.5
           Autocompute Intensity Bounds: true
           Autocompute Value Bounds:
             Max Value: 203.29579162597656
@@ -1185,7 +1191,7 @@ Visualization Manager:
           Use Fixed Frame: true
           Use rainbow: true
           Value: true
-        - Alpha: 1
+        - Alpha: 0.5
           Autocompute Intensity Bounds: true
           Autocompute Value Bounds:
             Max Value: 203.29579162597656
@@ -1213,7 +1219,7 @@ Visualization Manager:
           Use Fixed Frame: true
           Use rainbow: true
           Value: true
-        - Alpha: 1
+        - Alpha: 0.5
           Autocompute Intensity Bounds: true
           Autocompute Value Bounds:
             Max Value: 203.29579162597656
@@ -1241,7 +1247,7 @@ Visualization Manager:
           Use Fixed Frame: true
           Use rainbow: true
           Value: true
-        - Alpha: 1
+        - Alpha: 0.5
           Autocompute Intensity Bounds: true
           Autocompute Value Bounds:
             Max Value: 203.29579162597656
@@ -1269,7 +1275,7 @@ Visualization Manager:
           Use Fixed Frame: true
           Use rainbow: true
           Value: true
-        - Alpha: 1
+        - Alpha: 0.5
           Autocompute Intensity Bounds: true
           Autocompute Value Bounds:
             Max Value: 203.29579162597656
@@ -1297,7 +1303,7 @@ Visualization Manager:
           Use Fixed Frame: true
           Use rainbow: true
           Value: true
-        - Alpha: 1
+        - Alpha: 0.5
           Autocompute Intensity Bounds: true
           Autocompute Value Bounds:
             Max Value: 203.29579162597656
@@ -1325,7 +1331,7 @@ Visualization Manager:
           Use Fixed Frame: true
           Use rainbow: true
           Value: true
-        - Alpha: 1
+        - Alpha: 0.5
           Autocompute Intensity Bounds: true
           Autocompute Value Bounds:
             Max Value: 203.29579162597656
@@ -1353,7 +1359,7 @@ Visualization Manager:
           Use Fixed Frame: true
           Use rainbow: true
           Value: true
-        - Alpha: 1
+        - Alpha: 0.5
           Autocompute Intensity Bounds: true
           Autocompute Value Bounds:
             Max Value: 203.29579162597656
@@ -1381,7 +1387,7 @@ Visualization Manager:
           Use Fixed Frame: true
           Use rainbow: true
           Value: true
-        - Alpha: 1
+        - Alpha: 0.5
           Autocompute Intensity Bounds: true
           Autocompute Value Bounds:
             Max Value: 203.29579162597656
@@ -1409,7 +1415,7 @@ Visualization Manager:
           Use Fixed Frame: true
           Use rainbow: true
           Value: true
-        - Alpha: 1
+        - Alpha: 0.5
           Autocompute Intensity Bounds: true
           Autocompute Value Bounds:
             Max Value: 203.29579162597656
@@ -1437,7 +1443,7 @@ Visualization Manager:
           Use Fixed Frame: true
           Use rainbow: true
           Value: true
-        - Alpha: 1
+        - Alpha: 0.5
           Autocompute Intensity Bounds: true
           Autocompute Value Bounds:
             Max Value: 203.29579162597656
@@ -1465,7 +1471,7 @@ Visualization Manager:
           Use Fixed Frame: true
           Use rainbow: true
           Value: true
-        - Alpha: 1
+        - Alpha: 0.5
           Autocompute Intensity Bounds: true
           Autocompute Value Bounds:
             Max Value: 203.29579162597656
@@ -1493,7 +1499,7 @@ Visualization Manager:
           Use Fixed Frame: true
           Use rainbow: true
           Value: true
-        - Alpha: 1
+        - Alpha: 0.5
           Autocompute Intensity Bounds: true
           Autocompute Value Bounds:
             Max Value: 203.29579162597656
@@ -1521,7 +1527,7 @@ Visualization Manager:
           Use Fixed Frame: true
           Use rainbow: true
           Value: true
-        - Alpha: 1
+        - Alpha: 0.5
           Autocompute Intensity Bounds: true
           Autocompute Value Bounds:
             Max Value: 203.29579162597656
@@ -1549,7 +1555,7 @@ Visualization Manager:
           Use Fixed Frame: true
           Use rainbow: true
           Value: true
-        - Alpha: 1
+        - Alpha: 0.5
           Autocompute Intensity Bounds: true
           Autocompute Value Bounds:
             Max Value: 203.29579162597656
@@ -1577,7 +1583,7 @@ Visualization Manager:
           Use Fixed Frame: true
           Use rainbow: true
           Value: true
-        - Alpha: 1
+        - Alpha: 0.5
           Autocompute Intensity Bounds: true
           Autocompute Value Bounds:
             Max Value: 203.29579162597656
@@ -1605,7 +1611,7 @@ Visualization Manager:
           Use Fixed Frame: true
           Use rainbow: true
           Value: true
-        - Alpha: 1
+        - Alpha: 0.5
           Autocompute Intensity Bounds: true
           Autocompute Value Bounds:
             Max Value: 203.29579162597656
@@ -1633,7 +1639,7 @@ Visualization Manager:
           Use Fixed Frame: true
           Use rainbow: true
           Value: true
-        - Alpha: 1
+        - Alpha: 0.5
           Autocompute Intensity Bounds: true
           Autocompute Value Bounds:
             Max Value: 203.29579162597656
@@ -1661,7 +1667,7 @@ Visualization Manager:
           Use Fixed Frame: true
           Use rainbow: true
           Value: true
-        - Alpha: 1
+        - Alpha: 0.5
           Autocompute Intensity Bounds: true
           Autocompute Value Bounds:
             Max Value: 203.29579162597656
@@ -1689,7 +1695,7 @@ Visualization Manager:
           Use Fixed Frame: true
           Use rainbow: true
           Value: true
-        - Alpha: 1
+        - Alpha: 0.5
           Autocompute Intensity Bounds: true
           Autocompute Value Bounds:
             Max Value: 203.29579162597656
@@ -1717,7 +1723,7 @@ Visualization Manager:
           Use Fixed Frame: true
           Use rainbow: true
           Value: true
-        - Alpha: 1
+        - Alpha: 0.5
           Autocompute Intensity Bounds: true
           Autocompute Value Bounds:
             Max Value: 203.29579162597656
@@ -1745,7 +1751,7 @@ Visualization Manager:
           Use Fixed Frame: true
           Use rainbow: true
           Value: true
-        - Alpha: 1
+        - Alpha: 0.5
           Autocompute Intensity Bounds: true
           Autocompute Value Bounds:
             Max Value: 203.29579162597656
@@ -1773,7 +1779,7 @@ Visualization Manager:
           Use Fixed Frame: true
           Use rainbow: true
           Value: true
-        - Alpha: 1
+        - Alpha: 0.5
           Autocompute Intensity Bounds: true
           Autocompute Value Bounds:
             Max Value: 203.29579162597656
@@ -1801,7 +1807,7 @@ Visualization Manager:
           Use Fixed Frame: true
           Use rainbow: true
           Value: true
-        - Alpha: 1
+        - Alpha: 0.5
           Autocompute Intensity Bounds: true
           Autocompute Value Bounds:
             Max Value: 203.29579162597656
@@ -1829,7 +1835,7 @@ Visualization Manager:
           Use Fixed Frame: true
           Use rainbow: true
           Value: true
-        - Alpha: 1
+        - Alpha: 0.5
           Autocompute Intensity Bounds: true
           Autocompute Value Bounds:
             Max Value: 203.29579162597656
@@ -1857,7 +1863,7 @@ Visualization Manager:
           Use Fixed Frame: true
           Use rainbow: true
           Value: true
-        - Alpha: 1
+        - Alpha: 0.5
           Autocompute Intensity Bounds: true
           Autocompute Value Bounds:
             Max Value: 203.29579162597656
@@ -1885,7 +1891,7 @@ Visualization Manager:
           Use Fixed Frame: true
           Use rainbow: true
           Value: true
-        - Alpha: 1
+        - Alpha: 0.5
           Autocompute Intensity Bounds: true
           Autocompute Value Bounds:
             Max Value: 203.29579162597656
@@ -1913,7 +1919,7 @@ Visualization Manager:
           Use Fixed Frame: true
           Use rainbow: true
           Value: true
-        - Alpha: 1
+        - Alpha: 0.5
           Autocompute Intensity Bounds: true
           Autocompute Value Bounds:
             Max Value: 203.29579162597656
@@ -1941,7 +1947,7 @@ Visualization Manager:
           Use Fixed Frame: true
           Use rainbow: true
           Value: true
-        - Alpha: 1
+        - Alpha: 0.5
           Autocompute Intensity Bounds: true
           Autocompute Value Bounds:
             Max Value: 203.29579162597656
@@ -1969,7 +1975,7 @@ Visualization Manager:
           Use Fixed Frame: true
           Use rainbow: true
           Value: true
-        - Alpha: 1
+        - Alpha: 0.5
           Autocompute Intensity Bounds: true
           Autocompute Value Bounds:
             Max Value: 203.29579162597656
@@ -1997,7 +2003,7 @@ Visualization Manager:
           Use Fixed Frame: true
           Use rainbow: true
           Value: true
-        - Alpha: 1
+        - Alpha: 0.5
           Autocompute Intensity Bounds: true
           Autocompute Value Bounds:
             Max Value: 203.29579162597656
@@ -2025,7 +2031,7 @@ Visualization Manager:
           Use Fixed Frame: true
           Use rainbow: true
           Value: true
-        - Alpha: 1
+        - Alpha: 0.5
           Autocompute Intensity Bounds: true
           Autocompute Value Bounds:
             Max Value: 203.29579162597656
@@ -2105,25 +2111,25 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/Orbit
-      Distance: 51.10636901855469
+      Distance: 27.73078727722168
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1
         Swap Stereo Eyes: false
         Value: false
+      Field of View: 0.7853981852531433
       Focal Point:
-        X: 14.041913032531738
-        Y: -0.2787186801433563
-        Z: -14.1135892868042
+        X: 0
+        Y: 0
+        Z: 0
       Focal Shape Fixed Size: false
       Focal Shape Size: 0.05000000074505806
-      Invert Z Axis: false
+      Invert Z Axis: true
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Pitch: 1.1797966957092285
+      Pitch: 0.7653982043266296
       Target Frame: aft_mapped
-      Value: Orbit (rviz)
-      Yaw: 2.944565534591675
+      Yaw: 0.7103980183601379
     Saved:
       - Class: rviz/ThirdPersonFollower
         Distance: 2.466799259185791
@@ -2132,6 +2138,7 @@ Visualization Manager:
           Stereo Focal Distance: 1
           Swap Stereo Eyes: false
           Value: false
+        Field of View: 0.7853981852531433
         Focal Point:
           X: -0.11063814163208008
           Y: 0.30463317036628723
@@ -2143,7 +2150,6 @@ Visualization Manager:
         Near Clip Distance: 0.009999999776482582
         Pitch: 0.20539864897727966
         Target Frame: aft_mapped
-        Value: ThirdPersonFollower (rviz)
         Yaw: 3.13038969039917
       - Class: rviz/Orbit
         Distance: 10.964186668395996
@@ -2152,6 +2158,7 @@ Visualization Manager:
           Stereo Focal Distance: 1
           Swap Stereo Eyes: false
           Value: false
+        Field of View: 0.7853981852531433
         Focal Point:
           X: 0.6367835998535156
           Y: 0.2962583005428314
@@ -2163,17 +2170,16 @@ Visualization Manager:
         Near Clip Distance: 0.009999999776482582
         Pitch: 1.3853975534439087
         Target Frame: aft_mapped
-        Value: Orbit (rviz)
         Yaw: 3.0353875160217285
 Window Geometry:
   Displays:
     collapsed: false
-  Height: 2060
+  Height: 1529
   Hide Left Dock: false
   Hide Right Dock: true
   Input image:
     collapsed: false
-  QMainWindow State: 000000ff00000000fd0000000400000000000004f0000007d9fc0200000019fb0000001200530065006c0065006300740069006f006e00000001e10000009b0000005c00fffffffb0000001e0054006f006f006c002000500072006f0070006500720074006900650073020000050d0000039500000185000000a3fb000000120056006900650077007300200054006f006f02000001df000002110000018500000122fb000000200054006f006f006c002000500072006f0070006500720074006900650073003203000002880000011d000002210000017afb0000002000730065006c0065006300740069006f006e00200062007500660066006500720200000138000000aa0000023a00000294fb00000014005700690064006500530074006500720065006f02000000e6000000d2000003ee0000030bfb0000000c004b0069006e0065006300740200000186000001060000030c00000261fb0000001200720061007700200049006d0061006700650000000028000000300000000000000000fb00000012007200610077005f0069006d0061006700650000000299000001680000000000000000fb0000000c00430061006d0065007200610000000000000002330000000000000000fb00000020006c006f006f0070005f006d0061007400630068005f0069006d0061006700650000000230000001380000000000000000fb0000000a0049006d00610067006500000000000000019d0000000000000000fb000000160049006e00700075007400200069006d00610067006500000000160000035a0000001600fffffffb000000220066006500610074007500720065007300200074007200610063006b0069006e006701000003ba0000028d0000000000000000fb0000000c00430061006d00650072006101000001e80000001d0000000000000000fb0000000a0049006d0061006700650100000416000004100000000000000000fb0000001c0054007200610063006b0065006400200070006f0069006e007400730100000016000004100000001600fffffffb000000100044006900730070006c006100790073010000042c000003c3000000c900fffffffb000000100044006900730070006c00610079007300000005950000035f000000c900fffffffc000000280000011e0000000000fffffffa000000000100000002fb0000001200720061007700200049006d0061006700650000000000ffffffff0000000000000000fb0000001a0074007200610063006b0065006400200069006d0061006700650100000000000002370000000000000000fb0000001000410052005f0069006d0061006700650100000373000000160000000000000000fb0000001200720061007700200069006d006100670065010000038f000000160000000000000000fb000000100044006900730070006c0061007900730100000427000003ff0000000000000000fb0000000c00430061006d006500720061010000059b0000028b0000000000000000fb0000000a0049006d0061006700650100000739000000ed0000000000000000000000010000020800000826fc0200000004fb0000000a00560069006500770073000000000000000826000000a400fffffffb0000001e0054006f006f006c002000500072006f00700065007200740069006500730100000041000000780000000000000000fb000000100044006900730070006c006100790073000000040a0000041c0000000000000000fb0000001200530065006c0065006300740069006f006e010000025a000000b200000000000000000000000200000f00000000a9fc0100000001fb0000000a00560069006500770073030000004e00000080000002e1000001970000000300000e9e0000004afc0100000002fb0000000800540069006d00650200000062000003ec000004f5000001e0fb0000000800540069006d00650100000000000004500000000000000000000009a8000007d900000004000000040000000800000008fc0000000100000002000000010000000a0054006f006f006c00730000000000ffffffff0000000000000000
+  QMainWindow State: 000000ff00000000fd00000004000000000000024b000005befc0200000019fb0000001200530065006c0065006300740069006f006e00000001e10000009b0000006e00fffffffb0000001e0054006f006f006c002000500072006f0070006500720074006900650073020000050d0000039500000185000000a3fb000000120056006900650077007300200054006f006f02000001df000002110000018500000122fb000000200054006f006f006c002000500072006f0070006500720074006900650073003203000002880000011d000002210000017afb0000002000730065006c0065006300740069006f006e00200062007500660066006500720200000138000000aa0000023a00000294fb00000014005700690064006500530074006500720065006f02000000e6000000d2000003ee0000030bfb0000000c004b0069006e0065006300740200000186000001060000030c00000261fb0000001200720061007700200049006d0061006700650000000028000000300000000000000000fb00000012007200610077005f0069006d0061006700650000000299000001680000000000000000fb0000000c00430061006d0065007200610000000000000002330000000000000000fb00000020006c006f006f0070005f006d0061007400630068005f0069006d0061006700650000000230000001380000000000000000fb0000000a0049006d00610067006500000000000000019d0000000000000000fb000000160049006e00700075007400200069006d00610067006500000000160000035a0000001900fffffffb000000220066006500610074007500720065007300200074007200610063006b0069006e006701000003ba0000028d0000000000000000fb0000000c00430061006d00650072006101000001e80000001d0000000000000000fb0000000a0049006d0061006700650100000416000004100000000000000000fb0000001c0054007200610063006b0065006400200070006f0069006e00740073010000001a000001600000001900fffffffb000000100044006900730070006c006100790073010000018100000457000000f100fffffffb000000100044006900730070006c00610079007300000005950000035f000000f100fffffffc000000280000011e0000000000fffffffa000000000100000002fb0000001200720061007700200049006d0061006700650000000000ffffffff0000000000000000fb0000001a0074007200610063006b0065006400200069006d0061006700650100000000000002370000000000000000fb0000001000410052005f0069006d0061006700650100000373000000160000000000000000fb0000001200720061007700200069006d006100670065010000038f000000160000000000000000fb000000100044006900730070006c0061007900730100000427000003ff0000000000000000fb0000000c00430061006d006500720061010000059b0000028b0000000000000000fb0000000a0049006d0061006700650100000739000000ed00000000000000000000000100000208000005befc0200000004fb0000000a00560069006500770073000000001a000005be000000c200fffffffb0000001e0054006f006f006c002000500072006f00700065007200740069006500730100000041000000780000000000000000fb000000100044006900730070006c006100790073000000040a0000041c0000000000000000fb0000001200530065006c0065006300740069006f006e010000025a000000b200000000000000000000000200000f00000000a9fc0100000001fb0000000a00560069006500770073030000004e00000080000002e1000001970000000300000e9e0000004afc0100000002fb0000000800540069006d0065020000006200000258000004c3000001e0fb0000000800540069006d0065010000000000000450000000000000000000000786000005be00000004000000040000000800000008fc0000000100000002000000010000000a0054006f006f006c00730000000000ffffffff0000000000000000
   Selection:
     collapsed: false
   Time:
@@ -2182,6 +2188,6 @@ Window Geometry:
     collapsed: false
   Views:
     collapsed: true
-  Width: 3742
-  X: 98
-  Y: 44
+  Width: 2520
+  X: 40
+  Y: 1114
